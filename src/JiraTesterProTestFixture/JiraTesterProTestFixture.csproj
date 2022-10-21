@@ -16,4 +16,9 @@
     <PackageReference Include="coverlet.collector" Version="3.1.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\JiraTesterProData\JiraTesterProData.csproj" />
+    <ProjectReference Include="..\JiraTesterProService\JiraTesterProService.csproj" />
+  </ItemGroup>
+
 </Project>
