@@ -28,7 +28,7 @@ class Program
         try
         {
             Console.WriteLine(opts.ToString());
-            var test = await jiraclient.Projects.GetProjectAsync("CUS");
+            var test =  jiraclient.Projects.GetProjectAsync("CUS").Result;
         }
         catch (Exception e)
         {
