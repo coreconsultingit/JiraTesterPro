@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32901.215
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JiraTesterProMain", "src\JiraTesterProMain\JiraTesterProMain.csproj", "{3159351F-2560-4187-B282-4C2FA5173625}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JiraTesterProService", "src\JiraTesterProService\JiraTesterProService.csproj", "{FEA6AE99-6273-4D4C-AE4C-B8C608F2E671}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JiraTesterProData", "src\JiraTesterProData\JiraTesterProData.csproj", "{0CBE0900-9869-4D29-AF6F-DC3E7B2F1D0A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JiraTesterProTestFixture", "src\JiraTesterProTestFixture\JiraTesterProTestFixture.csproj", "{D2585F5A-8228-4DE2-8A19-928119D54620}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3159351F-2560-4187-B282-4C2FA5173625}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3159351F-2560-4187-B282-4C2FA5173625}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3159351F-2560-4187-B282-4C2FA5173625}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3159351F-2560-4187-B282-4C2FA5173625}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEA6AE99-6273-4D4C-AE4C-B8C608F2E671}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEA6AE99-6273-4D4C-AE4C-B8C608F2E671}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEA6AE99-6273-4D4C-AE4C-B8C608F2E671}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEA6AE99-6273-4D4C-AE4C-B8C608F2E671}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0CBE0900-9869-4D29-AF6F-DC3E7B2F1D0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0CBE0900-9869-4D29-AF6F-DC3E7B2F1D0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0CBE0900-9869-4D29-AF6F-DC3E7B2F1D0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0CBE0900-9869-4D29-AF6F-DC3E7B2F1D0A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2585F5A-8228-4DE2-8A19-928119D54620}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2585F5A-8228-4DE2-8A19-928119D54620}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2585F5A-8228-4DE2-8A19-928119D54620}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2585F5A-8228-4DE2-8A19-928119D54620}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9CEEB8CD-888A-4280-943C-AAB8323F2D92}
+	EndGlobalSection
+EndGlobal
