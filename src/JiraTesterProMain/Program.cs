@@ -5,6 +5,7 @@ using Atlassian.Jira;
 using Atlassian.Jira.Remote;
 using CommandLine;
 using JiraTesterProData;
+using JiraTesterProService;
 using Serilog;
 
 namespace JiraTesterProMain;
@@ -40,11 +41,16 @@ class Program
         try
         {
             Log.Logger.Information(opts.ToString());
-            
-            var test = await jiraclient.Projects.GetProjectAsync("CUS");
-            
+            var jira = new Jiraservice(opts.Username, opts.Password,opts.JiraUrl);
 
-           
+            await jira.CreateJira(new JiraTestMasterDto()
+            {
+                Project = "CUS",
+                IssueType = "Initial Release"
+            });
+
+
+
         }
         catch (Exception e)
         {
