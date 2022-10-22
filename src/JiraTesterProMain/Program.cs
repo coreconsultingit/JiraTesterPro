@@ -5,39 +5,52 @@ using Atlassian.Jira;
 using Atlassian.Jira.Remote;
 using CommandLine;
 using JiraTesterProData;
+using Serilog;
+
+namespace JiraTesterProMain;
 
 class Program
 {
-    static async Task Main(string[] args)
+    static void Main(string[] args)
     {
+        Log.Logger = new LoggerConfiguration()
+            .WriteTo.File("..\\logs\\JiraTester.txt", rollingInterval: RollingInterval.Day)
+            .WriteTo.Console()
+            .CreateLogger();
         Parser.Default.ParseArguments<JiraTesterCommandLineOptions>(args)
-            .WithParsed(async opts => await DoSomeWork(opts))
-            .WithNotParsed((errs) => HandleParseError(errs));
+            .WithParsed(DoSomeWork)
+            .WithNotParsed(HandleParseError);
     }
 
-    static async Task DoSomeWork(JiraTesterCommandLineOptions opts)
+    static void DoSomeWork(JiraTesterCommandLineOptions opts)
     {
-        var settings = new JiraRestClientSettings()
-        {
-            EnableUserPrivacyMode = false
+        Task.WaitAll(GetJiraTestResult(opts));
+    }
 
+    static async Task GetJiraTestResult(JiraTesterCommandLineOptions opts)
+    {
+        var settings = new JiraRestClientSettings
+        {
+            CustomFieldSerializers =
+            {
+                ["com.atlassian.jira.plugin.system.customfieldtypes:multiuserpicker"] = new MultiObjectCustomFieldValueSerializer("displayName")
+            }
         };
-        settings.CustomFieldSerializers["com.atlassian.jira.plugin.system.customfieldtypes:multiuserpicker"]
-            = new MultiObjectCustomFieldValueSerializer("displayName");
         var jiraclient = Jira.CreateRestClient(opts.JiraUrl, opts.Username, opts.Password, settings);
         try
         {
-            Console.WriteLine(opts.ToString());
-            var test =  jiraclient.Projects.GetProjectAsync("CUS").Result;
+            Log.Logger.Information(opts.ToString());
+            
+            var test = await jiraclient.Projects.GetProjectAsync("CUS");
+            
+
+           
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
             throw;
         }
-
-
-        //var issues = await jiraclient.Issues.CreateIssueAsync();
     }
 
     static void HandleParseError(IEnumerable errs)
@@ -46,7 +59,3 @@ class Program
     }
 
 }
-
-
-
-
