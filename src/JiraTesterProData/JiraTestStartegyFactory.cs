@@ -9,16 +9,26 @@ public class JiraTestStartegyFactory : IJiraTestStartegyFactory
         this.serviceProvider = serviceProvider;
     }
 
-    public Task<JiraTestResult> GetJiraTestStrategy(JiraActionEnum jiraAction)
+    public Task<JiraTestResult> GetJiraTestStrategy(JiraTestMasterDto jiraTestMasterDto)
     {
-        switch (jiraAction)
+        var parsedAction = Enum.TryParse<JiraActionEnum>(jiraTestMasterDto.Action, true, out JiraActionEnum jiraAction);
+        if (parsedAction)
         {
-            case JiraActionEnum.Create:
-                return ((JiraTestStrategy)serviceProvider.GetService(typeof(JiraCreateIssueTestStrategyImpl))).Execute();
-            default:
-                throw new NotImplementedException();
+            switch (jiraAction)
+            {
+                case JiraActionEnum.Create:
+                    return ((JiraTestStrategy)serviceProvider.GetService(typeof(JiraCreateIssueTestStrategyImpl)))
+                        .Execute(jiraTestMasterDto);
+                default:
+                    throw new NotImplementedException();
 
 
+            }
         }
+        else
+        {
+            throw new InvalidDataException();
+        }
+
     }
 }

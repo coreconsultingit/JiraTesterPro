@@ -9,6 +9,6 @@ namespace JiraTesterProData
 {
     public abstract class JiraTestStrategy
     {
-        public abstract Task<JiraTestResult> Execute();
+        public abstract Task<JiraTestResult> Execute(JiraTestMasterDto jiraTestMasterDto);
     }
 }

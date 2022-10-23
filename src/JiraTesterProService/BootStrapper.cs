@@ -16,7 +16,7 @@ namespace JiraTesterProService
     public static class BootStrapper
     {
         public static IServiceProvider ServiceProvider { get; private set; }
-        public static void RegisterDependency(this IServiceCollection services, JiraTesterCommandLineOptions options)
+        public static void RegisterDependency(this IServiceCollection services)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
