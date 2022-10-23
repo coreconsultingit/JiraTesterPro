@@ -17,15 +17,15 @@ public class JiraCreateIssueTestStrategyImpl : JiraTestStrategy
 
         try
         {
-            var issue = jiraClient.CreateIssue(jiraTestMasterDto.Project);
-            var test = await jiraClient.Projects.GetProjectAsync(jiraTestMasterDto.Project);
-            var issueType = await test.GetIssueTypesAsync();
+            
+            var projectDetails = await jiraClient.Projects.GetProjectAsync(jiraTestMasterDto.Project);
+            var issueType = await projectDetails.GetIssueTypesAsync();
 
             var type = issueType.Where(x => x.Name == "Initial Release").FirstOrDefault();
             var issueCreated = jiraClient.CreateIssue(jiraTestMasterDto.Project);
-            issueCreated.Summary = "test from api";
+            issueCreated.Summary = jiraTestMasterDto.Summary;
             issueCreated.Type = type;
-            await issue.SaveChangesAsync();
+            await issueCreated.SaveChangesAsync();
             return new JiraTestResult()
             {
                 JiraTestMasterDto = jiraTestMasterDto,

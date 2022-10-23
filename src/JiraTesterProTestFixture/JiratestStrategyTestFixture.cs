@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace JiraTesterProTestFixture
 {
+    [TestFixture]
     public class JiratestStrategyTestFixture: JiraTestFixtureBase
     {
 
@@ -16,12 +17,14 @@ namespace JiraTesterProTestFixture
         }
 
         [Test]
-        public void IsAble_To_CreateTest_IfPassedArgumentsCorrectly()
+        public async Task IsAble_To_CreateTest_IfPassedArgumentsCorrectly()
         {
-            var testResult = testStartegyFactory.GetJiraTestStrategy(new JiraTestMasterDto()
+            var testResult = await testStartegyFactory.GetJiraTestStrategy(new JiraTestMasterDto()
             {
-                Project = "CUS", IsSubTask = false, IssueType = "Initial Release", Action = "Create"
+                Project = "CUS", IsSubTask = false, IssueType = "Initial Release", Action = "Create", Summary = "Test Summary"
             });
+
+            Assert.IsNotNull(testResult);
         }
     }
 }
