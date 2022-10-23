@@ -34,9 +34,9 @@ class Program
     }
 
     static async Task GetJiraTestResult(JiraTesterCommandLineOptions opts)
-    {
+    {   
         var servicecollection = new ServiceCollection();
-        servicecollection.RegisterDependency();
+        servicecollection.RegisterDependency(opts);
 
 
         //var client = new RestClient($"https://coreconsultingit.atlassian.net/rest/api/2/");

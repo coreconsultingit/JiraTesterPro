@@ -16,18 +16,19 @@ namespace JiraTesterProService
     public static class BootStrapper
     {
         public static IServiceProvider ServiceProvider { get; private set; }
-        public static void RegisterDependency(this IServiceCollection services)
+        public static void RegisterDependency(this IServiceCollection services, JiraTesterCommandLineOptions options)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
             IConfiguration configuration = builder.Build();
-            services.AddSingleton(provider => configuration);
-            services.AddSingleton<ILoggerFactory, LoggerFactory>();
-            services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
+            services.AddScoped(provider => configuration);
+            services.AddScoped<ILoggerFactory, LoggerFactory>();
+            services.AddScoped(typeof(ILogger<>), typeof(Logger<>));
 
-            services.AddSingleton<JiraTestStrategy, JiraCreateIssueTestStrategyImpl>();
+            services.AddScoped<JiraTestStrategy, JiraCreateIssueTestStrategyImpl>();
 
+            services.AddScoped<IJiraClientProvider, JiraClientProvider>();
             ServiceProvider = services.BuildServiceProvider();
         }
     }
