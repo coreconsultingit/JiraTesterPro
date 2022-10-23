@@ -16,7 +16,7 @@ namespace JiraTesterProService
     public static class BootStrapper
     {
         public static IServiceProvider ServiceProvider { get; private set; }
-        public static void RegisterDependency(this IServiceCollection services)
+        public static void RegisterDependency(this IServiceCollection services, JiraTesterCommandLineOptions options)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -28,8 +28,17 @@ namespace JiraTesterProService
 
             services.AddScoped<JiraTestStrategy, JiraCreateIssueTestStrategyImpl>();
 
-            services.AddScoped<IJiraClientProvider, JiraClientProvider>();
             ServiceProvider = services.BuildServiceProvider();
+        }
+
+        private static void RegisterJiraClientProvider(IServiceCollection services, IConfiguration configuration, JiraTesterCommandLineOptions options)
+        {
+            var username = configuration.GetValue<string>("JiraConfig:userName");
+            var passwordtoken = configuration.GetValue<string>("JiraConfig:password");
+            var jiraurl = configuration.GetValue<string>("JiraConfig:jiraUrl");
+
+
+            services.AddScoped<IJiraClientProvider, JiraClientProvider>(x=> new JiraClientProvider(options.Username??username, options.Password??passwordtoken,options.JiraUrl??jiraurl));
         }
     }
 }

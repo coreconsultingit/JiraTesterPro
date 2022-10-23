@@ -8,24 +8,28 @@ public class JiraClientProvider : IJiraClientProvider
     private string passwordtoken;
     private string jiraurl;
 
-    public JiraClientProvider(IConfiguration configuration)
+    public JiraClientProvider(string username, string passwordtoken, string jiraurl)
     {
-        username = configuration.GetValue<string>("JiraConfig:userName");
-        passwordtoken = configuration.GetValue<string>("JiraConfig:password");
-        jiraurl = configuration.GetValue<string>("JiraConfig:jiraUrl");
+        this.username = username;
+        this.passwordtoken = passwordtoken;
+        this.jiraurl = jiraurl;
     }
 
-    public Jira GetJiraClient(JiraTesterCommandLineOptions options)
+    public Jira GetJiraClient(JiraRestClientSettings? settings)
     {
-        var settings = new JiraRestClientSettings()
+        if (settings == null)
         {
-            EnableRequestTrace = true
+            settings = new JiraRestClientSettings()
+            {
+                EnableRequestTrace = true
 
-        };
+            };
+        }
+        
         settings.CustomFieldSerializers["com.atlassian.jira.plugin.system.customfieldtypes:multiuserpicker"]
             = new MultiObjectCustomFieldValueSerializer("displayName");
         return Jira.CreateRestClient(
             
-           options.JiraUrl?? jiraurl, options.Username??username, options.Password??passwordtoken, settings);
+            jiraurl, username, passwordtoken, settings);
     }
 }

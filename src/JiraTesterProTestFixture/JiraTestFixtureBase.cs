@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using JiraTesterProData;
 using JiraTesterProService;
 
 namespace JiraTesterProTestFixture
@@ -16,7 +17,7 @@ namespace JiraTesterProTestFixture
         public void BaseSetUp()
         {
             var servicecollection = new ServiceCollection();
-            servicecollection.RegisterDependency();
+            servicecollection.RegisterDependency(new JiraTesterCommandLineOptions());
             _serviceProvider = BootStrapper.ServiceProvider;
         }
     }

@@ -1,4 +1,4 @@
-﻿namespace JiraTesterProData;
+﻿namespace JiraTesterProService;
 
 public class JiraTestStartegyFactory : IJiraTestStartegyFactory
 {
@@ -9,7 +9,7 @@ public class JiraTestStartegyFactory : IJiraTestStartegyFactory
         this.serviceProvider = serviceProvider;
     }
 
-    public Task<JiraTestResult> GetJiraTestStrategy(JiraTestMasterDto jiraTestMasterDto)
+    public  async Task<JiraTestResult> GetJiraTestStrategy(JiraTestMasterDto jiraTestMasterDto)
     {
         var parsedAction = Enum.TryParse<JiraActionEnum>(jiraTestMasterDto.Action, true, out JiraActionEnum jiraAction);
         if (parsedAction)
@@ -17,7 +17,7 @@ public class JiraTestStartegyFactory : IJiraTestStartegyFactory
             switch (jiraAction)
             {
                 case JiraActionEnum.Create:
-                    return ((JiraTestStrategy)serviceProvider.GetService(typeof(JiraCreateIssueTestStrategyImpl)))
+                    return await ((JiraTestStrategy)serviceProvider.GetService(typeof(JiraCreateIssueTestStrategyImpl)))
                         .Execute(jiraTestMasterDto);
                 default:
                     throw new NotImplementedException();

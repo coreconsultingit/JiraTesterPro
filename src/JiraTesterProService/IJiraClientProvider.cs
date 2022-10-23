@@ -5,6 +5,6 @@ namespace JiraTesterProService
 {
     public  interface IJiraClientProvider
     {
-        Jira GetJiraClient(JiraTesterCommandLineOptions options);
+        Jira GetJiraClient(JiraRestClientSettings? settings=null);
     }
 }

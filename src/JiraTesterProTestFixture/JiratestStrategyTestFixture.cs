@@ -1,4 +1,5 @@
 using JiraTesterProData;
+using JiraTesterProService;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace JiraTesterProTestFixture
@@ -17,7 +18,10 @@ namespace JiraTesterProTestFixture
         [Test]
         public void IsAble_To_CreateTest_IfPassedArgumentsCorrectly()
         {
-            var testResult = testStartegyFactory.GetJiraTestStrategy()
+            var testResult = testStartegyFactory.GetJiraTestStrategy(new JiraTestMasterDto()
+            {
+                Project = "CUS", IsSubTask = false, IssueType = "Initial Release", Action = "Create"
+            });
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace JiraTesterProData;
+﻿namespace JiraTesterProService;
 
 public interface IJiraTestStartegyFactory
 {
