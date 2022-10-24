@@ -17,14 +17,29 @@ namespace JiraTesterProTestFixture
         }
 
         [Test]
-        public async Task IsAble_To_CreateTest_IfPassedArgumentsCorrectly()
+        public async Task IsAble_To_CreateIssue_If_PassedArgumentsCorrectly()
         {
-            var testResult = await testStartegyFactory.GetJiraTestStrategy(new JiraTestMasterDto()
+            var testResult = await testStartegyFactory.GetJiraTestStrategyResult(new JiraTestMasterDto()
             {
                 Project = "CUS", IsSubTask = false, IssueType = "Initial Release", Action = "Create", Summary = "Test Summary"
             });
 
-            Assert.IsNotNull(testResult);
+            Assert.IsFalse(testResult.HasException);
+        }
+
+        [Test]
+        public async Task IsNotAble_To_CreateIssue_IfPassedArgumentsInCorrectly()
+        {
+            var testResult = await testStartegyFactory.GetJiraTestStrategyResult(new JiraTestMasterDto()
+            {
+                Project = "CUS1",
+                IsSubTask = false,
+                IssueType = "Initial Release",
+                Action = "Create",
+                
+            });
+
+            Assert.IsTrue(testResult.HasException);
         }
     }
 }

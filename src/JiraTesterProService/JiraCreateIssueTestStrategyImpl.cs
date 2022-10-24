@@ -14,7 +14,6 @@ public class JiraCreateIssueTestStrategyImpl : JiraTestStrategy
     public override async Task<JiraTestResult> Execute(JiraTestMasterDto jiraTestMasterDto)
     {
         var jiraClient = jiraClientProvider.GetJiraClient();
-
         try
         {
             
@@ -29,7 +28,8 @@ public class JiraCreateIssueTestStrategyImpl : JiraTestStrategy
             return new JiraTestResult()
             {
                 JiraTestMasterDto = jiraTestMasterDto,
-                Result = true
+                HasException = false,
+              
             };
         }
         catch (Exception e)
@@ -37,7 +37,8 @@ public class JiraCreateIssueTestStrategyImpl : JiraTestStrategy
             return new JiraTestResult()
             {
                 JiraTestMasterDto = jiraTestMasterDto,
-                Result = false
+                HasException = true,
+                ExceptionMessage = e.Message
             };
         }
        

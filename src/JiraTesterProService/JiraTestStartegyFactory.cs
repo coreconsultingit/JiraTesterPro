@@ -9,7 +9,7 @@ public class JiraTestStartegyFactory : IJiraTestStartegyFactory
         this.serviceProvider = serviceProvider;
     }
 
-    public  async Task<JiraTestResult> GetJiraTestStrategy(JiraTestMasterDto jiraTestMasterDto)
+    public  async Task<JiraTestResult> GetJiraTestStrategyResult(JiraTestMasterDto jiraTestMasterDto)
     {
         var parsedAction = Enum.TryParse<JiraActionEnum>(jiraTestMasterDto.Action, true, out JiraActionEnum jiraAction);
         if (parsedAction)

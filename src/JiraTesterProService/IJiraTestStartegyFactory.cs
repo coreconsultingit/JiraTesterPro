@@ -2,6 +2,6 @@
 
 public interface IJiraTestStartegyFactory
 {
-    Task<JiraTestResult> GetJiraTestStrategy(JiraTestMasterDto jiraTestMasterDto);
+    Task<JiraTestResult> GetJiraTestStrategyResult(JiraTestMasterDto jiraTestMasterDto);
 
 }
