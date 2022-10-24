@@ -21,7 +21,8 @@ namespace JiraTesterProTestFixture
         {
             var testResult = await testStartegyFactory.GetJiraTestStrategyResult(new JiraTestMasterDto()
             {
-                Project = "CUS", IsSubTask = false, IssueType = "Initial Release", Action = "Create", Summary = "Test Summary"
+                Project = "CUS", IsSubTask = false, IssueType = "Initial Release", Action = "Create", Summary = "Test Summary",
+                ExpectedStatus = "Created"
             });
 
             Assert.IsFalse(testResult.HasException);

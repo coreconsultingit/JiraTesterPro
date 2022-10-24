@@ -1,14 +1,16 @@
 ﻿using Atlassian.Jira;
+using Microsoft.Extensions.Logging;
 
 namespace JiraTesterProService;
 
 public class JiraCreateIssueTestStrategyImpl : JiraTestStrategy
 {
     private IJiraClientProvider jiraClientProvider;
-
-    public JiraCreateIssueTestStrategyImpl(IJiraClientProvider jiraClientProvider)
+    private ILogger<JiraCreateIssueTestStrategyImpl> logger;
+    public JiraCreateIssueTestStrategyImpl(IJiraClientProvider jiraClientProvider, ILogger<JiraCreateIssueTestStrategyImpl> logger)
     {
         this.jiraClientProvider = jiraClientProvider;
+        this.logger = logger;
     }
 
     public override async Task<JiraTestResult> Execute(JiraTestMasterDto jiraTestMasterDto)
@@ -24,12 +26,17 @@ public class JiraCreateIssueTestStrategyImpl : JiraTestStrategy
             var issueCreated = jiraClient.CreateIssue(jiraTestMasterDto.Project);
             issueCreated.Summary = jiraTestMasterDto.Summary;
             issueCreated.Type = type;
-            await issueCreated.SaveChangesAsync();
+            issueCreated=await issueCreated.SaveChangesAsync();
+
+            logger.LogInformation("{issueCreated}",issueCreated);
+
+
             return new JiraTestResult()
             {
                 JiraTestMasterDto = jiraTestMasterDto,
-                HasException = false,
-              
+                HasException = issueCreated.Status.Name==jiraTestMasterDto.ExpectedStatus,
+                TestPassed=true
+
             };
         }
         catch (Exception e)
@@ -38,7 +45,8 @@ public class JiraCreateIssueTestStrategyImpl : JiraTestStrategy
             {
                 JiraTestMasterDto = jiraTestMasterDto,
                 HasException = true,
-                ExceptionMessage = e.Message
+                ExceptionMessage = e.Message,
+                TestPassed = jiraTestMasterDto.Expectation=="Failed"
             };
         }
        

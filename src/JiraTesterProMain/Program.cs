@@ -66,22 +66,22 @@ class Program
 
 
 
-        var settings = new JiraRestClientSettings
-        {
-            CustomFieldSerializers =
-            {
-                ["com.atlassian.jira.plugin.system.customfieldtypes:multiuserpicker"] = new MultiObjectCustomFieldValueSerializer("displayName")
-            }
-        };
+        //var settings = new JiraRestClientSettings
+        //{
+        //    CustomFieldSerializers =
+        //    {
+        //        ["com.atlassian.jira.plugin.system.customfieldtypes:multiuserpicker"] = new MultiObjectCustomFieldValueSerializer("displayName")
+        //    }
+        //};
         //var jiraclient = Jira.CreateRestClient(opts.JiraUrl, opts.Username, opts.Password, settings);
         //var wf = await jiraclient.RestClient.ExecuteRequestAsync<Value[]>(Method.GET, "rest/api/2/workflow");
-        var str =
-            "{\"name\": \"Workflow 1\",\"description\": \"This is a workflow used for Stories and Tasks\",\"statuses\": [" +
-            "{\"id\": \"1\",\"properties\": {\"jira.issue.editable\": \"false\"}},{\"id\": \"3\"}" +
-            ",{\"id\": \"4\"}],\"transitions\": [{\"name\": \"Created\",\"from\": [],\"to\": \"1\",\"type\": \"initial\"},{\"name\": " +
-            "\"In progress\",\"screen\": { \"id\": \"10001\"},\"from\": [\"1\"],\"rules\": {\"postFunctions\": [{\"type\": \"AssignToCurrentUserFunction\"}],\"conditions\": {\"conditions\": [" +
-            "{\"type\": \"RemoteOnlyCondition\"},{\"configuration\": {\"groups\": [\"administrators\"]},\"type\": \"UserInAnyGroupCondition\"}],\"operator\": \"AND\"}},\"to\": \"3\",\"type\": \"directed\",\"properties\": {\"custom-property\": \"custom-value\"}" +
-            "},{\"name\": \"Completed\",\"rules\": {\"postFunctions\": [{\"configuration\": {\"fieldId\": \"assignee\"},\"type\": \"ClearFieldValuePostFunction\"}],\"validators\": [{\"configuration\": {\"parentStatuses\": [{\"id\": \"3\"}]},\"type\": \"ParentStatusValidator\"},{\"configuration\": {\"permissionKey\": \"ADMINISTER_PROJECTS\"},\"type\": \"PermissionValidator\"}]},\"to\": \"3\",\"type\": \"global\"}]}";
+        //var str =
+        //    "{\"name\": \"Workflow 1\",\"description\": \"This is a workflow used for Stories and Tasks\",\"statuses\": [" +
+        //    "{\"id\": \"1\",\"properties\": {\"jira.issue.editable\": \"false\"}},{\"id\": \"3\"}" +
+        //    ",{\"id\": \"4\"}],\"transitions\": [{\"name\": \"Created\",\"from\": [],\"to\": \"1\",\"type\": \"initial\"},{\"name\": " +
+        //    "\"In progress\",\"screen\": { \"id\": \"10001\"},\"from\": [\"1\"],\"rules\": {\"postFunctions\": [{\"type\": \"AssignToCurrentUserFunction\"}],\"conditions\": {\"conditions\": [" +
+        //    "{\"type\": \"RemoteOnlyCondition\"},{\"configuration\": {\"groups\": [\"administrators\"]},\"type\": \"UserInAnyGroupCondition\"}],\"operator\": \"AND\"}},\"to\": \"3\",\"type\": \"directed\",\"properties\": {\"custom-property\": \"custom-value\"}" +
+        //    "},{\"name\": \"Completed\",\"rules\": {\"postFunctions\": [{\"configuration\": {\"fieldId\": \"assignee\"},\"type\": \"ClearFieldValuePostFunction\"}],\"validators\": [{\"configuration\": {\"parentStatuses\": [{\"id\": \"3\"}]},\"type\": \"ParentStatusValidator\"},{\"configuration\": {\"permissionKey\": \"ADMINISTER_PROJECTS\"},\"type\": \"PermissionValidator\"}]},\"to\": \"3\",\"type\": \"global\"}]}";
 
         //var wf = await jiraclient.RestClient.ExecuteRequestAsync<Value[]>(Method.POST, "rest/api/3/workflow",
         //    JObject.Parse(str));
