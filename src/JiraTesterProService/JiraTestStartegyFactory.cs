@@ -58,9 +58,11 @@ public class JiraTestStartegyFactory : IJiraTestStartegyFactory
             }
             var result = await GetJiraTestStrategyResult(test);
             lstTaskResults.Add(result);
+            
             parentIssueKey = result.JiraIssue.Key.Value;
             prevIssueKey = result.JiraIssue.Key.Value;
             jiraGroup = test.GroupKey;
+            issueType = result.JiraIssue.Type.Name;
         }
 
         return lstTaskResults;

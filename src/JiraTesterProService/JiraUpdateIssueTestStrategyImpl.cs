@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Runtime.InteropServices.ComTypes;
+using Microsoft.Extensions.Logging;
 
 namespace JiraTesterProService;
 
@@ -23,41 +24,47 @@ public class JiraUpdateIssueTestStrategyImpl: JiraTestStrategy
 
         try
         {
-
-            
-            var parentIssue = await jiraClient.Issues.GetIssueAsync(string.IsNullOrEmpty(jiraTestMasterDto.ParentIssueKey)? jiraTestMasterDto.IssueKey: jiraTestMasterDto.ParentIssueKey);
-
-            var subtasks = await parentIssue.GetSubTasksAsync();
-            if (subtasks.Any())
+            Issue issueToUpdate = null;
+            if (!string.IsNullOrEmpty(jiraTestMasterDto.IssueKey))
             {
-                var subTaskToUpdate = subtasks.Where(x =>
-                    x.Type == jiraTestMasterDto.IssueType).FirstOrDefault();
-
+                issueToUpdate = await jiraClient.Issues.GetIssueAsync(jiraTestMasterDto.IssueKey);
+            }
+            else
+            {
+                var parentIssue = await jiraClient.Issues.GetIssueAsync(jiraTestMasterDto.ParentIssueKey);
+                var subtasks = await parentIssue.GetSubTasksAsync();
+                if (subtasks.Any())
+                {
+                    issueToUpdate = subtasks.Where(x =>
+                        x.Type == jiraTestMasterDto.IssueType).FirstOrDefault();
+                }
                
-               
-                await subTaskToUpdate.WorkflowTransitionAsync(jiraTestMasterDto.Status);//= //issuestatus.Where(x => x.Name == jiraTestMasterDto.Status);
-                jiraTestResult.TestPassed = true;
-                jiraTestResult.JiraIssue = subTaskToUpdate;
 
             }
 
+            if (!string.IsNullOrEmpty(jiraTestMasterDto.CustomFieldInput))
+            {
+                foreach (var field in jiraTestMasterDto.CustomFieldInput.Split(","))
+                {
+                    var arrfield = field.Split(":");
+                    issueToUpdate.CustomFields.Add(arrfield[0], arrfield[1]);
+                }
+            }
+
             
+            //issueToUpdate.
+            await issueToUpdate.WorkflowTransitionAsync(jiraTestMasterDto
+                .Status); //= //issuestatus.Where(x => x.Name == jiraTestMasterDto.Status);
+            jiraTestResult.TestPassed = true;
+            jiraTestResult.JiraIssue = issueToUpdate;
 
-            //var issueType = await projectDetails.GetIssueTypesAsync();
 
-            //var type = issueType.Where(x => x.Name == "Initial Release").FirstOrDefault();
-            //var issueCreated = jiraClient.CreateIssue(jiraTestMasterDto.Project);
-            //issueCreated.Summary = jiraTestMasterDto.Summary;
-            //issueCreated.Type = type;
-            //issueCreated = await issueCreated.SaveChangesAsync();
 
-            //logger.LogInformation("{issueCreated}", issueCreated);
-            //jiraTestResult.HasException = issueCreated.Status.Name == jiraTestMasterDto.ExpectedStatus;
+
+
+
             jiraTestResult.TestPassed = true;
             //jiraTestResult.JiraIssue = issueCreated;
-
-            //jiraTestResult.JiraIssue = issueCreated;
-
         }
         catch (Exception e)
         {
@@ -66,6 +73,7 @@ public class JiraUpdateIssueTestStrategyImpl: JiraTestStrategy
             jiraTestResult.TestPassed = jiraTestMasterDto.Expectation == "Failed";
 
         }
+
         return jiraTestResult;
     }
 }
