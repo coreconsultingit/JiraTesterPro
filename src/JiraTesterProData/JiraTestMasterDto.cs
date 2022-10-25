@@ -89,6 +89,10 @@ public class Properties1
 */
 public class JiraTestMasterDto
 {
+    public string ParentIssueKey{ get; set; }
+
+    public string IssueKey { get; set; }
+
     public string GroupKey { get; set; }
     public int OrderId { get; set; }
 
@@ -97,6 +101,8 @@ public class JiraTestMasterDto
     public string IssueType { get; set; }
 
     public string Component { get; set; }
+
+    public string Status { get; set; }
 
     public string CustomFieldInput { get; set; }
     public string Summary { get; set; }

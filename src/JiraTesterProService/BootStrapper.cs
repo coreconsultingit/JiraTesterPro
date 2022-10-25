@@ -27,6 +27,7 @@ namespace JiraTesterProService
             services.AddScoped(typeof(ILogger<>), typeof(Logger<>));
 
             services.AddScoped<JiraCreateIssueTestStrategyImpl>();
+            services.AddScoped<JiraUpdateIssueTestStrategyImpl>();
             services.AddScoped<IJiraTestStartegyFactory, JiraTestStartegyFactory>();
             RegisterJiraClientProvider(services, configuration, options);
             ServiceProvider = services.BuildServiceProvider();
