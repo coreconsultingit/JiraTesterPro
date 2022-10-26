@@ -14,7 +14,7 @@ public class JiraUpdateIssueTestStrategyImpl: JiraTestStrategy
         this.logger = logger;
     }
 
-    public async override Task<JiraTestResult> Execute(JiraTestMasterDto jiraTestMasterDto)
+    public override async Task<JiraTestResult> Execute(JiraTestMasterDto jiraTestMasterDto)
     {
         var jiraClient = jiraClientProvider.GetJiraClient();
         var jiraTestResult = new JiraTestResult()
@@ -48,9 +48,7 @@ public class JiraUpdateIssueTestStrategyImpl: JiraTestStrategy
                 }
             }
 
-            var project = await jiraClient.Projects.GetProjectAsync("CUS");
-            var issuetype = await project.GetIssueTypesAsync();
-            var first = issuetype.FirstOrDefault();
+            
            
             //issueToUpdate.
             await issueToUpdate.WorkflowTransitionAsync(jiraTestMasterDto

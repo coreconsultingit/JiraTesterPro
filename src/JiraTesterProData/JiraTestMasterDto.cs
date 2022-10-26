@@ -113,7 +113,7 @@ public class JiraTestMasterDto
 
     public string ExpectedStatus { get; set; }
 
-    public int SubTaskCount { get; set; }
+    public int? ExpectedSubTaskCount { get; set; }
     public string SubTaskList { get; set; }
 
     public bool IsSubTask { get; set; }

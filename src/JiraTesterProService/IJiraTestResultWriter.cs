@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing.Printing;
 using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -22,8 +23,12 @@ namespace JiraTesterProService
                 File.Delete(filepath);
             }
             var builder = new HtmlContentBuilder();
-            builder.AppendFormat($"<html><body Style=\"background-image: linear-gradient(180deg, #4b0f41, grey);\"> <table border=\"1\">");
-            builder.AppendFormat("<tr style=\"color: #fff;\">");
+            builder.AppendFormat("<html><head><style> table {{margin: 0 auto;}}</style> <link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css\" integrity=\"sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T\" crossorigin=\"anonymous\">" +
+                                 "</head><body>");
+
+            builder.AppendFormat("<div class=\"container-fluid\"> <ul class=\"nav\" Style=\"background-image: linear-gradient(180deg, #4b0f41, grey); color:#fff\"><li class=\"nav-item\">" +
+                                 "TestResults run at :</li></ul>");
+            builder.AppendFormat("<table border=\"1\"><tr>");
 
             builder.AppendFormat($"<th>GroupKey</th>");
             builder.AppendFormat($"<th>Project</th>");
@@ -52,7 +57,7 @@ namespace JiraTesterProService
                 builder.AppendFormat("</tr>");
             }
 
-            builder.AppendFormat("</table></body></html>");
+            builder.AppendFormat("</table></div></body></html>");
             using TextWriter writer = File.CreateText(filepath);
             builder.WriteTo(writer,HtmlEncoder.Default);
         }
