@@ -38,10 +38,7 @@ public class JiraUpdateIssueTestStrategyImpl: JiraTestStrategy
                     issueToUpdate = subtasks.Where(x =>
                         x.Type == jiraTestMasterDto.IssueType).FirstOrDefault();
                 }
-               
-
             }
-
             if (!string.IsNullOrEmpty(jiraTestMasterDto.CustomFieldInput))
             {
                 foreach (var field in jiraTestMasterDto.CustomFieldInput.Split(","))
@@ -51,7 +48,10 @@ public class JiraUpdateIssueTestStrategyImpl: JiraTestStrategy
                 }
             }
 
-            
+            var project = await jiraClient.Projects.GetProjectAsync("CUS");
+            var issuetype = await project.GetIssueTypesAsync();
+            var first = issuetype.FirstOrDefault();
+           
             //issueToUpdate.
             await issueToUpdate.WorkflowTransitionAsync(jiraTestMasterDto
                 .Status); //= //issuestatus.Where(x => x.Name == jiraTestMasterDto.Status);

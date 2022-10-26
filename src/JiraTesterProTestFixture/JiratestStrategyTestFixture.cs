@@ -73,11 +73,15 @@ namespace JiraTesterProTestFixture
                 Component = "ERT Internal",
                 Summary = "Test Summary Created from automated test",
                 ExpectedStatus = "Created",
-                Status = "Completed"
+                Status = "Completed",
+                CustomFieldInput = "Named PMO:dev-test"
             });
 
 
             var testResult = await testStartegyFactory.GetJiraTestStrategyResult(jiraMasterDtos);
+
+            var writer = _serviceProvider.GetService<IJiraTestResultWriter>();
+            writer.WriteTestResult(testResult,"C:\\temp\\test.html");
 
             Assert.IsNotEmpty(testResult);
 
