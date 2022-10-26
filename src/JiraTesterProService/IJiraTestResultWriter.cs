@@ -22,12 +22,14 @@ namespace JiraTesterProService
                 File.Delete(filepath);
             }
             var builder = new HtmlContentBuilder();
-            builder.AppendFormat($"<html><table border=\"1\">");
-            builder.AppendFormat("<tr>");
+            builder.AppendFormat($"<html><body Style=\"background-image: linear-gradient(180deg, #4b0f41, grey);\"> <table border=\"1\">");
+            builder.AppendFormat("<tr style=\"color: #fff;\">");
 
             builder.AppendFormat($"<th>GroupKey</th>");
             builder.AppendFormat($"<th>Project</th>");
             builder.AppendFormat($"<th>Summary</th>");
+            builder.AppendFormat($"<th>IssueType</th>");
+            builder.AppendFormat($"<th>IsSubTask</th>");
             builder.AppendFormat($"<th>TestPassed</th>");
             builder.AppendFormat($"<th>HasException</th>");
             //builder.AppendFormat($"<th>ExceptionMessage</th>");
@@ -41,6 +43,8 @@ namespace JiraTesterProService
                 builder.AppendFormat($"<td>{result.JiraTestMasterDto.GroupKey}</td>");
                 builder.AppendFormat($"<td>{result.JiraTestMasterDto.Project}</td>");
                 builder.AppendFormat($"<td>{result.JiraTestMasterDto.Summary}</td>");
+                builder.AppendFormat($"<td>{result.JiraTestMasterDto.IssueType}</td>");
+                builder.AppendFormat($"<td>{result.JiraTestMasterDto.IsSubTask}</td>");
                 builder.AppendFormat($"<td>{result.TestPassed}</td>");
                 builder.AppendFormat($"<td>{result.HasException}</td>");
                 //builder.AppendFormat($"<td>{(string.IsNullOrEmpty(result.ExceptionMessage)?String.Empty : result.ExceptionMessage)}</td>");
@@ -48,7 +52,7 @@ namespace JiraTesterProService
                 builder.AppendFormat("</tr>");
             }
 
-            builder.AppendFormat("</table></html>");
+            builder.AppendFormat("</table></body></html>");
             using TextWriter writer = File.CreateText(filepath);
             builder.WriteTo(writer,HtmlEncoder.Default);
         }

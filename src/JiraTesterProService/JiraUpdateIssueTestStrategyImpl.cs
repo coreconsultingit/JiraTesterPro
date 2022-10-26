@@ -59,12 +59,6 @@ public class JiraUpdateIssueTestStrategyImpl: JiraTestStrategy
             jiraTestResult.JiraIssue = issueToUpdate;
 
 
-
-
-
-
-            jiraTestResult.TestPassed = true;
-            //jiraTestResult.JiraIssue = issueCreated;
         }
         catch (Exception e)
         {

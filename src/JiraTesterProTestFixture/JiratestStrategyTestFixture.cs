@@ -42,7 +42,7 @@ namespace JiraTesterProTestFixture
                 IssueType = "Initial Release",
                 Action = "Create",
                 Component = "ERT Internal",
-                Summary = "Test Summary Created from automated test",
+                Summary = "Test Summary Created from automated test master",
                 ExpectedStatus = "Created",
                 SubTaskList = "Sub Task - Resource Request-1 - Successfully created."
 
@@ -57,7 +57,7 @@ namespace JiraTesterProTestFixture
                 
                 Action = "Update",
                 Component = "ERT Internal",
-                Summary = "Test Summary Created from automated test",
+                Summary = "Test Summary Created from automated test 1",
                 ExpectedStatus = "Created",
                 Status = "In Progress"
             });
@@ -71,7 +71,7 @@ namespace JiraTesterProTestFixture
 
                 Action = "Update",
                 Component = "ERT Internal",
-                Summary = "Test Summary Created from automated test",
+                Summary = "Test Summary Created from automated test 2",
                 ExpectedStatus = "Created",
                 Status = "Completed",
                 CustomFieldInput = "Named PMO:dev-test"
