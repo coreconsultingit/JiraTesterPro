@@ -13,6 +13,15 @@ public static class StringExtension
 
         return val;
     }
+    public static string GetEmptyIfEmptyOrNull(this string val)
+    {
+        if (string.IsNullOrEmpty(val))
+        {
+            return String.Empty;
+        }
+
+        return val;
+    }
 
     public static string GetNoneIfEmptyOrNull(this object val)
     {

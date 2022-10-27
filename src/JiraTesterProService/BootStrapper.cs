@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using JiraTesterProData;
+using JiraTesterProService.ExcelHandler;
+using JiraTesterProService.FileHandler;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -30,6 +32,25 @@ namespace JiraTesterProService
             services.AddScoped<JiraUpdateIssueTestStrategyImpl>();
             services.AddScoped<IJiraTestStartegyFactory, JiraTestStartegyFactory>();
             services.AddScoped<IJiraTestResultWriter, JiraTestResultWriter>();
+
+            services.AddTransient(typeof(IFileGenerator<>), typeof(FileGenerator<>));
+            
+            services.AddScoped(typeof(IFileService<>), typeof(DelimettedFileService<>));
+
+
+            services.AddScoped<IExcelReader, ExcelReader>();
+            //services.AddScoped<IExcelWriter, ExcelWriter>();
+            services.AddScoped<IFileFactory, FileFactory>();
+            services.AddScoped<IFileHandlerFactory, FileHandlerFactory>();
+
+            services.AddScoped<DelimettedFileService>()
+                .AddScoped<IFileService, DelimettedFileService>(s => s.GetService<DelimettedFileService>());
+
+            services.AddScoped<ExcelFileService>()
+                .AddScoped<IFileService, ExcelFileService>(s => s.GetService<ExcelFileService>());
+            services.AddScoped<IPropertyBinder, PropertyBinder>();
+            services.AddScoped(typeof(IDataTableParser<>), typeof(DataTableParser<>));
+
             RegisterJiraClientProvider(services, configuration, options);
             ServiceProvider = services.BuildServiceProvider();
         }

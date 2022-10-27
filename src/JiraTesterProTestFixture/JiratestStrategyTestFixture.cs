@@ -44,7 +44,8 @@ namespace JiraTesterProTestFixture
                 Component = "ERT Internal",
                 Summary = "Test Summary Created from automated test master",
                 ExpectedStatus = "Created",
-                SubTaskList = "Sub Task - Resource Request-1 - Successfully created."
+                ExpectedSubTaskList = "Sub Task - Resource Request-1 - Successfully created.",
+                ExpectedSubTaskCount = 1
 
             });
             jiraMasterDtos.Add(new JiraTestMasterDto()

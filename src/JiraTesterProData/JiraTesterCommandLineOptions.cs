@@ -5,6 +5,9 @@ namespace JiraTesterProData
 {
     public class JiraTesterCommandLineOptions
     {
+        [Option('i', "inputJiratestfile", Required = false, HelpText = "Your Jira test input file")]
+        public string? InputJiraTestFile { get; set; }
+
         [Option('j', "jiraurl", Required = false, HelpText = "Your jira url")]
         public string? JiraUrl { get; set; }
 
@@ -15,7 +18,7 @@ namespace JiraTesterProData
 
         public override string ToString()
         {
-            return $"Running with username {Username} password {Password} JiraUrl {JiraUrl}";
+            return $"Running with username {Username} password {Password} JiraUrl {JiraUrl}  Jira input file {InputJiraTestFile}";
         }
     }
 }

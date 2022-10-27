@@ -1,6 +1,9 @@
-﻿using Atlassian.Jira;
+﻿using System.Text.Json;
+using Atlassian.Jira;
 using JiraTesterProData;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
+using RestSharp;
 
 namespace JiraTesterProService;
 
@@ -17,6 +20,9 @@ public class JiraCreateIssueTestStrategyImpl : JiraTestStrategy
     public override async Task<JiraTestResult> Execute(JiraTestMasterDto jiraTestMasterDto)
     {
         var jiraClient = jiraClientProvider.GetJiraClient();
+
+        //var wf = await jiraClient.RestClient.ExecuteRequestAsync<JsonObject>(Method.GET, "rest/api/2/issue/createmeta?projectKeys=ECOA&expand=projects.issuetypes.fields");
+
         var jiraTestResult = new JiraTestResult()
         {
             JiraTestMasterDto = jiraTestMasterDto
@@ -38,9 +44,11 @@ public class JiraCreateIssueTestStrategyImpl : JiraTestStrategy
                 issueCreated.Components.Add(jiraTestMasterDto.Component);
             }
             issueCreated = await issueCreated.SaveChangesAsync();
+            
+           
             logger.LogInformation("{issueCreated}",issueCreated);
 
-            AssertSubTaskCount(issueCreated, jiraTestMasterDto);
+            await AssertSubTaskCount(issueCreated, jiraTestMasterDto);
             jiraTestResult.HasException = issueCreated.Status.Name == jiraTestMasterDto.ExpectedStatus;
             jiraTestResult.TestPassed = true;
             jiraTestResult.JiraIssue = issueCreated;

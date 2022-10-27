@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using JiraTesterProData.Extensions;
 using Microsoft.AspNetCore.Html;
 
 namespace JiraTesterProService
@@ -37,7 +38,7 @@ namespace JiraTesterProService
             builder.AppendFormat($"<th>IsSubTask</th>");
             builder.AppendFormat($"<th>TestPassed</th>");
             builder.AppendFormat($"<th>HasException</th>");
-            //builder.AppendFormat($"<th>ExceptionMessage</th>");
+            builder.AppendFormat($"<th>ExceptionMessage</th>");
 
             builder.AppendFormat("</tr>");
 
@@ -52,7 +53,7 @@ namespace JiraTesterProService
                 builder.AppendFormat($"<td>{result.JiraTestMasterDto.IsSubTask}</td>");
                 builder.AppendFormat($"<td>{result.TestPassed}</td>");
                 builder.AppendFormat($"<td>{result.HasException}</td>");
-                //builder.AppendFormat($"<td>{(string.IsNullOrEmpty(result.ExceptionMessage)?String.Empty : result.ExceptionMessage)}</td>");
+                builder.AppendFormat($"<td>{result.ExceptionMessage.GetEmptyIfEmptyOrNull()}</td>");
 
                 builder.AppendFormat("</tr>");
             }

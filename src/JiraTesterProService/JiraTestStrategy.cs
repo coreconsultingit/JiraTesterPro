@@ -16,9 +16,9 @@ namespace JiraTesterProService
                     throw new Exception("Sub task count doesn't match");
                 }
 
-                if (!string.IsNullOrEmpty(jiraTestMasterDto.SubTaskList))
+                if (!string.IsNullOrEmpty(jiraTestMasterDto.ExpectedSubTaskList))
                 {
-                    if (subTasks.Select(x => x.Summary).ToList().IsListEqual(jiraTestMasterDto.SubTaskList.Split(",")))
+                    if (!subTasks.Select(x => x.Summary).ToList().IsListEqual(jiraTestMasterDto.ExpectedSubTaskList.Split(",")))
                     {
                         throw new Exception("Sub task created summary doesn't match");
                     }
