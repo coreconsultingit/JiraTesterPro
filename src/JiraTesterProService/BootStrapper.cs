@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OfficeOpenXml.FormulaParsing.Logging;
+using Serilog;
 using LoggerFactory = Microsoft.Extensions.Logging.LoggerFactory;
 
 
@@ -24,6 +25,7 @@ namespace JiraTesterProService
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
             IConfiguration configuration = builder.Build();
+            services.AddLogging(x => x.AddSerilog());
             services.AddScoped(provider => configuration);
             services.AddScoped<ILoggerFactory, LoggerFactory>();
             services.AddScoped(typeof(ILogger<>), typeof(Logger<>));
