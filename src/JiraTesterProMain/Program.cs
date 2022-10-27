@@ -1,20 +1,14 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using System.Collections;
-using Atlassian.Jira;
-using Atlassian.Jira.Remote;
 using CommandLine;
 using JiraTesterProData;
 using JiraTesterProService;
-using RestSharp.Authenticators;
-using RestSharp;
 using Serilog;
-using System.Net;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json.Linq;
 using JiraTesterProService.FileHandler;
-using System;
 using Microsoft.Extensions.Configuration;
+using JiraTesterProService.ExcelHandler;
 
 namespace JiraTesterProMain;
 
@@ -42,12 +36,29 @@ class Program
         servicecollection.RegisterDependency(opts);
         try
         {
+            var serviceProvider = BootStrapper.ServiceProvider;
             Log.Logger.Information(opts.ToString());
-            var fileFactory = BootStrapper.ServiceProvider.GetService<IFileFactory>();
-            var config = BootStrapper.ServiceProvider.GetService<IConfiguration>();
+            var fileFactory = serviceProvider.GetService<IFileFactory>();
+            var config = serviceProvider.GetService<IConfiguration>();
             var testFileData = await fileFactory.GetDataTableFromFile(new FileInfo(opts.InputJiraTestFile?? config.GetValue<string>("InputJiraTestFile")));
+            
+           
+            var parser = serviceProvider.GetService<IDataTableParser<JiraTestMasterDto>>();
+            
+            var parsedItems = parser.ConvertDataTableToList(testFileData, null);
+            var testStartegyFactory = serviceProvider.GetService<IJiraTestStartegyFactory>();
+            if (parsedItems.lstValidationMessage.Any())
+            {
+                foreach (var message in parsedItems.lstValidationMessage)
+                {
+                    Log.Logger.Error(message);
+                }
 
-
+                throw new Exception("Error parsing the file");
+            }
+            var testResult = await testStartegyFactory.GetJiraTestStrategyResult(parsedItems.lstItems);
+            var writer = serviceProvider.GetService<IJiraTestResultWriter>();
+            writer.WriteTestResult(testResult, opts.OutputJiraTestFile ?? config.GetValue<string>("OutputJiraTestFile"));
         }
         catch (Exception e)
         {

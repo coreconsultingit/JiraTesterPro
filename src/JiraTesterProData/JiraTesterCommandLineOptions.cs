@@ -5,11 +5,14 @@ namespace JiraTesterProData
 {
     public class JiraTesterCommandLineOptions
     {
-        [Option('i', "inputJiratestfile", Required = false, HelpText = "Your Jira test input file")]
+        [Option('i', "inputjiratestfile", Required = false, HelpText = "Your Jira test input file")]
         public string? InputJiraTestFile { get; set; }
 
         [Option('j', "jiraurl", Required = false, HelpText = "Your jira url")]
         public string? JiraUrl { get; set; }
+
+        [Option('o', "outputjiratestfile", Required = false, HelpText = "Your Jira test result file")]
+        public string? OutputJiraTestFile { get; set; }
 
         [Option('u', "username", Required = false, HelpText = "Your username")]
         public string? Username { get; set; }

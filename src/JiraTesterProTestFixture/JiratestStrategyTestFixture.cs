@@ -81,8 +81,7 @@ namespace JiraTesterProTestFixture
 
             var testResult = await testStartegyFactory.GetJiraTestStrategyResult(jiraMasterDtos);
 
-            var writer = _serviceProvider.GetService<IJiraTestResultWriter>();
-            writer.WriteTestResult(testResult,"C:\\temp\\test.html");
+           
 
             Assert.IsNotEmpty(testResult);
 
