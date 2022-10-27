@@ -12,6 +12,9 @@ using Serilog;
 using System.Net;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
+using JiraTesterProService.FileHandler;
+using System;
+using Microsoft.Extensions.Configuration;
 
 namespace JiraTesterProMain;
 
@@ -40,7 +43,9 @@ class Program
         try
         {
             Log.Logger.Information(opts.ToString());
-           
+            var fileFactory = BootStrapper.ServiceProvider.GetService<IFileFactory>();
+            var config = BootStrapper.ServiceProvider.GetService<IConfiguration>();
+            var testFileData = await fileFactory.GetDataTableFromFile(new FileInfo(opts.InputJiraTestFile?? config.GetValue<string>("InputJiraTestFile")));
 
 
         }
