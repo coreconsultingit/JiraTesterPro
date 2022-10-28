@@ -46,7 +46,7 @@ public class JiraCreateIssueTestStrategyImpl : JiraTestStrategy
             issueCreated = await issueCreated.SaveChangesAsync();
             
            
-            logger.LogInformation("{issueCreated}",issueCreated);
+            logger.LogInformation("{@issueCreated}",issueCreated);
 
             await AssertSubTaskCount(issueCreated, jiraTestMasterDto);
             jiraTestResult.HasException = issueCreated.Status.Name == jiraTestMasterDto.ExpectedStatus;

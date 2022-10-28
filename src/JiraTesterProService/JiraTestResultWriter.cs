@@ -16,7 +16,7 @@ public class JiraTestResultWriter : IJiraTestResultWriter
                              "</head><body>");
 
         builder.AppendFormat("<div class=\"container-fluid\"> <ul class=\"nav\" Style=\"background-image: linear-gradient(180deg, #4b0f41, grey); color:#fff\"><li class=\"nav-item\">" +
-                             "TestResults run at :{0}</li></ul>",DateTime.Now.ToLongDateString());
+                             "TestResults run at :{0} {1}</li></ul>",DateTime.Now.ToLongDateString(), DateTime.Now.ToShortTimeString());
         builder.AppendFormat("<table border=\"1\"><tr>");
 
         builder.AppendFormat($"<th>GroupKey</th>");
@@ -26,22 +26,24 @@ public class JiraTestResultWriter : IJiraTestResultWriter
         builder.AppendFormat($"<th>IsSubTask</th>");
         builder.AppendFormat($"<th>TestPassed</th>");
         builder.AppendFormat($"<th>HasException</th>");
+        builder.AppendFormat($"<th>Jiraref</th>");
         builder.AppendFormat($"<th>ExceptionMessage</th>");
 
         builder.AppendFormat("</tr>");
 
         foreach (var result in lstJiraTestResult)
         {
-            builder.AppendFormat($"<tr bgcolor=\"{(result.HasException? "red":"green")}\">");
+            builder.AppendFormat($"<tr bgcolor=\"{(result.TestPassed ? "green":"red")}\">");
                 
-            builder.AppendFormat($"<td>{result.JiraTestMasterDto.GroupKey}</td>");
-            builder.AppendFormat($"<td>{result.JiraTestMasterDto.Project}</td>");
-            builder.AppendFormat($"<td>{result.JiraTestMasterDto.Summary}</td>");
-            builder.AppendFormat($"<td>{result.JiraTestMasterDto.IssueType}</td>");
-            builder.AppendFormat($"<td>{result.JiraTestMasterDto.IsSubTask}</td>");
-            builder.AppendFormat($"<td>{result.TestPassed}</td>");
-            builder.AppendFormat($"<td>{result.HasException}</td>");
-            builder.AppendFormat($"<td>{result.ExceptionMessage.GetEmptyIfEmptyOrNull()}</td>");
+            builder.AppendFormat("<td>{0}</td>", result.JiraTestMasterDto.GroupKey);
+            builder.AppendFormat("<td>{0}</td>", result.JiraTestMasterDto.Project);
+            builder.AppendFormat("<td>{0}</td>", result.JiraTestMasterDto.Summary);
+            builder.AppendFormat("<td>{0}</td>", result.JiraTestMasterDto.IssueType);
+            builder.AppendFormat("<td>{0}</td>", result.JiraTestMasterDto.IsSubTask);
+            builder.AppendFormat("<td>{0}</td>", result.TestPassed);
+            builder.AppendFormat("<td>{0}</td>", result.HasException);
+            builder.AppendFormat("<td>{0}</td>", result.ExceptionMessage.GetEmptyIfEmptyOrNull());
+            builder.AppendFormat("<td>{0}</td>",(result.JiraIssue==null? String.Empty: result.JiraIssue.Key.ToString()));
 
             builder.AppendFormat("</tr>");
         }

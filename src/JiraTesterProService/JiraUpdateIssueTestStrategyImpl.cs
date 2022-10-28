@@ -55,6 +55,7 @@ public class JiraUpdateIssueTestStrategyImpl: JiraTestStrategy
                 .Status); //= //issuestatus.Where(x => x.Name == jiraTestMasterDto.Status);
             jiraTestResult.TestPassed = true;
             jiraTestResult.JiraIssue = issueToUpdate;
+            jiraTestResult.HasException = false;
 
 
         }

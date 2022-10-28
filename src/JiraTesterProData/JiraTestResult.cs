@@ -12,7 +12,7 @@ public class JiraTestResult
 
     public string ExceptionMessage { get; set; }
 
-    public Issue  JiraIssue { get; set; }
+    public Issue?  JiraIssue { get; set; }
 }
 public class ReconConfig
 {
