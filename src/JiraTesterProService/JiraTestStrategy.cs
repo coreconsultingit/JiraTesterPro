@@ -27,5 +27,10 @@ namespace JiraTesterProService
 
             }
         }
+
+        protected  void AssertExpectedStatus(Issue issue, JiraTestMasterDto jiraTestMasterDto, JiraTestResult jiraTestResult)
+        {
+            jiraTestResult.HasException = issue.Status.Name == jiraTestMasterDto.ExpectedStatus;
+        }
     }
 }
