@@ -42,8 +42,9 @@ public class JiraTestResultWriter : IJiraTestResultWriter
             builder.AppendFormat("<td>{0}</td>", result.JiraTestMasterDto.IsSubTask);
             builder.AppendFormat("<td>{0}</td>", result.TestPassed);
             builder.AppendFormat("<td>{0}</td>", result.HasException);
-            builder.AppendFormat("<td>{0}</td>", result.ExceptionMessage.GetEmptyIfEmptyOrNull());
+            
             builder.AppendFormat("<td>{0}</td>",(result.JiraIssue==null? String.Empty: result.JiraIssue.Key.ToString()));
+            builder.AppendFormat("<td>{0}</td>", result.ExceptionMessage.GetEmptyIfEmptyOrNull());
 
             builder.AppendFormat("</tr>");
         }

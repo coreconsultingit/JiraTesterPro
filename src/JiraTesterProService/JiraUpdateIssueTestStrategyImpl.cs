@@ -24,6 +24,7 @@ public class JiraUpdateIssueTestStrategyImpl: JiraTestStrategy
 
         try
         {
+            logger.LogInformation("Started updating jira with the dto {@jiraTestMasterDto}", jiraTestMasterDto);
             Issue issueToUpdate = null;
             if (!string.IsNullOrEmpty(jiraTestMasterDto.IssueKey))
             {

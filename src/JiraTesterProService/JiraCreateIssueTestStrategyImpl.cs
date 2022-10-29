@@ -21,15 +21,15 @@ public class JiraCreateIssueTestStrategyImpl : JiraTestStrategy
     {
         var jiraClient = jiraClientProvider.GetJiraClient();
 
-        //var wf = await jiraClient.RestClient.ExecuteRequestAsync<JsonObject>(Method.GET, "rest/api/2/issue/createmeta?projectKeys=ECOA&expand=projects.issuetypes.fields");
-
+        var wf = await jiraClient.RestClient.ExecuteRequestAsync<JObject>(Method.GET, "rest/api/2/issue/createmeta?projectKeys=ECOA&expand=projects.issuetypes.fields");
+        var test = wf.ToString();
         var jiraTestResult = new JiraTestResult()
         {
             JiraTestMasterDto = jiraTestMasterDto
         };
         try
         {
-            
+            logger.LogInformation("Started creating jira with the dto {@jiraTestMasterDto}", jiraTestMasterDto);
 
             var projectDetails = await jiraClient.Projects.GetProjectAsync(jiraTestMasterDto.Project);
             var issueType = await projectDetails.GetIssueTypesAsync();
