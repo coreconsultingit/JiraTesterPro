@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using JiraTesterProData.Extensions;
+using System.IO;
 
 namespace JiraTesterProService.ExcelHandler;
 
@@ -28,6 +29,8 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
 
                 foreach (var celladdress in searchCell)
                 {
+
+                    var dictTestCell = new Dictionary<string, int>();
                     DataTable tbl = new DataTable();
                     var columnlist = new List<string>();
 
@@ -45,10 +48,16 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
                         tbl.Columns.Add(columnname);
                         columnlist.Add(columnname);
                     }
-                    for (int rowNum = 4; rowNum <= worksheet.Dimension.End.Row; rowNum++)
+                    for (int rowNum = celladdress.Start.Row + 3; rowNum <= worksheet.Dimension.End.Row; rowNum++)
                     {
                         var endcolumn = worksheet.Dimension.End.Column;
                         var wsRow = worksheet.Cells[rowNum, 1, rowNum, endcolumn];
+                        if (wsRow.All(c => c.Value == null))
+                        {
+                            break;
+                        }
+
+
                         DataRow row = tbl.Rows.Add();
                         foreach (var cell in wsRow)
                         {
@@ -65,12 +74,24 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
                         }
                     }
 
+
+                    for (int i = 0; i < tbl.Rows.Count; i++)
+                    {
+                        
+                        dictTestCell.Add(tbl.Rows[i].ItemArray[0].GetNoneIfEmptyOrNull(),i);
+                    }
+
                     for (int i=1; i< tbl.Columns.Count;i++)
                     {
                         var test = new JiraTestMasterDto()
                         {
                             Project = projectCode.GetNoneIfEmptyOrNull(),
-                            GroupKey = groupCode.GetNoneIfEmptyOrNull()
+                            GroupKey = groupCode.GetNoneIfEmptyOrNull(),
+                            OrderId = i,
+                            IssueType = "BUG",
+                            Action = tbl.Rows[dictTestCell["Button (Transition)"]].ItemArray[i].GetNoneIfEmptyOrNull(),
+                            ExpectedStatus = tbl.Rows[dictTestCell["Resulting Status"]].ItemArray[i].GetNoneIfEmptyOrNull(),
+                            Expectation = JiraTestStatus.Passed.ToString()
                         };
 
                         lstJiraMasterDto.Add(test);
@@ -86,5 +107,15 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
         }
 
         return lstJiraMasterDto;
+    }
+
+    private string GetAction(string val)
+    {
+        if (val.ContainsWithIgnoreCase("CREATE"))
+        {
+            return JiraActionEnum.Create.ToString();
+        }
+
+        return JiraActionEnum.Update.ToString();
     }
 }
