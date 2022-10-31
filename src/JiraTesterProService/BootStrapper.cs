@@ -41,6 +41,7 @@ namespace JiraTesterProService
 
 
             services.AddScoped<IExcelReader, ExcelReader>();
+            services.AddScoped<IJiraTestScenarioReader, JiraTestScenarioReader>();
             //services.AddScoped<IExcelWriter, ExcelWriter>();
             services.AddScoped<IFileFactory, FileFactory>();
             services.AddScoped<IFileHandlerFactory, FileHandlerFactory>();
