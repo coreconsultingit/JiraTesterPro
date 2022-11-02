@@ -6,3 +6,9 @@ public enum JiraActionEnum
     Update
 
 }
+
+public enum JiraTestStatus
+{
+    Passed,
+    Failed
+}

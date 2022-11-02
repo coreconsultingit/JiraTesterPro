@@ -9,3 +9,7 @@ global using System.Globalization;
 global using JiraTesterProData.Extensions;
 global using CsvHelper;
 global using CsvHelper.Configuration;
+global using System.Data;
+global using JiraTesterProData.Extensions;
+global using Microsoft.Extensions.Logging;
+global using OfficeOpenXml;

@@ -52,6 +52,8 @@ public static class StringExtension
         return val.Equals(compareval, StringComparison.OrdinalIgnoreCase);
     }
 
+    
+
     public static (string, decimal) ParseCurrencyWithSymbol(this string input)
     {
         var cultures = CultureInfo.GetCultures(CultureTypes.AllCultures)

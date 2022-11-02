@@ -21,8 +21,8 @@ public class JiraCreateIssueTestStrategyImpl : JiraTestStrategy
     {
         var jiraClient = jiraClientProvider.GetJiraClient();
 
-        var wf = await jiraClient.RestClient.ExecuteRequestAsync<JObject>(Method.GET, "rest/api/2/issue/createmeta?projectKeys=ECOA&expand=projects.issuetypes.fields");
-        var test = wf.ToString();
+        //var wf = await jiraClient.RestClient.ExecuteRequestAsync<JObject>(Method.GET, "rest/api/2/issue/createmeta?projectKeys=ECOA&expand=projects.issuetypes.fields");
+        //var test = wf.ToString();
         var jiraTestResult = new JiraTestResult()
         {
             JiraTestMasterDto = jiraTestMasterDto
@@ -34,7 +34,7 @@ public class JiraCreateIssueTestStrategyImpl : JiraTestStrategy
             var projectDetails = await jiraClient.Projects.GetProjectAsync(jiraTestMasterDto.Project);
             var issueType = await projectDetails.GetIssueTypesAsync();
 
-            var type = issueType.Where(x => x.Name == jiraTestMasterDto.IssueType).FirstOrDefault();
+            var type = issueType.Where(x => x.Name.EqualsWithIgnoreCase(jiraTestMasterDto.IssueType)).FirstOrDefault();
             var issueCreated = jiraClient.CreateIssue(jiraTestMasterDto.Project);
             issueCreated.Summary = jiraTestMasterDto.Summary;
             issueCreated.Type = type;
