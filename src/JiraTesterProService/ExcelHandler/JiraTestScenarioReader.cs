@@ -118,7 +118,7 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
                             Project = projectCode.GetNoneIfEmptyOrNull(),
                             GroupKey = groupCode.GetNoneIfEmptyOrNull(),
                             OrderId = i,
-                            IssueType = "BUG",
+                            IssueType = issueType.GetNoneIfEmptyOrNull(),
                             Action = GetAction(tbl.Rows[dictTestCell["Button (Transition)"]].ItemArray[i].GetNoneIfEmptyOrNull()),
                             ExpectedStatus = tbl.Rows[dictTestCell["Resulting Status"]].ItemArray[i].GetNoneIfEmptyOrNull(),
                             Expectation = JiraTestStatus.Passed.ToString(),
