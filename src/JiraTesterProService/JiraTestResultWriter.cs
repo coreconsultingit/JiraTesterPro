@@ -23,6 +23,8 @@ public class JiraTestResultWriter : IJiraTestResultWriter
         builder.AppendFormat($"<th>Project</th>");
         builder.AppendFormat($"<th>Summary</th>");
         builder.AppendFormat($"<th>IssueType</th>");
+        builder.AppendFormat($"<th>Action</th>");
+        builder.AppendFormat($"<th>Status</th>");
         builder.AppendFormat($"<th>IsSubTask</th>");
         builder.AppendFormat($"<th>TestPassed</th>");
         builder.AppendFormat($"<th>HasException</th>");
@@ -39,10 +41,11 @@ public class JiraTestResultWriter : IJiraTestResultWriter
             builder.AppendFormat("<td>{0}</td>", result.JiraTestMasterDto.Project);
             builder.AppendFormat("<td>{0}</td>", result.JiraTestMasterDto.Summary);
             builder.AppendFormat("<td>{0}</td>", result.JiraTestMasterDto.IssueType);
+            builder.AppendFormat("<td>{0}</td>", result.JiraTestMasterDto.Action);
+            builder.AppendFormat("<td>{0}</td>", result.JiraTestMasterDto.Status);
             builder.AppendFormat("<td>{0}</td>", result.JiraTestMasterDto.IsSubTask);
             builder.AppendFormat("<td>{0}</td>", result.TestPassed);
             builder.AppendFormat("<td>{0}</td>", result.HasException);
-            
             builder.AppendFormat("<td>{0}</td>",(result.JiraIssue==null? String.Empty: result.JiraIssue.Key.ToString()));
             builder.AppendFormat("<td>{0}</td>", result.ExceptionMessage.GetEmptyIfEmptyOrNull());
 

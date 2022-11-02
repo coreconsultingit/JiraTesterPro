@@ -43,9 +43,18 @@ public class JiraCreateIssueTestStrategyImpl : JiraTestStrategy
             {
                 issueCreated.Components.Add(jiraTestMasterDto.Component);
             }
+
+            if (!string.IsNullOrEmpty(jiraTestMasterDto.CustomFieldInput))
+            {
+             
+                foreach (var field in jiraTestMasterDto.CustomFieldInput.Split("|"))
+                {
+
+                    var arrfield = field.Split(":");
+                    issueCreated.CustomFields.Add(arrfield[0], arrfield[1]);
+                }
+            }
             issueCreated = await issueCreated.SaveChangesAsync();
-            
-           
             logger.LogInformation("{@issueCreated}",issueCreated);
 
             await AssertSubTaskCount(issueCreated, jiraTestMasterDto);

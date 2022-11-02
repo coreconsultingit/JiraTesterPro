@@ -1,6 +1,7 @@
 ﻿using JiraTesterProService;
 using JiraTesterProService.ExcelHandler;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace JiraTesterProTestFixture;
 
@@ -16,16 +17,17 @@ public class JiraTestScenarioReaderTestFixture: JiraTestFixtureBase
     }
 
     [Test]
-    public async Task Is_Able_ToReadExcelRules()
+    public async Task Is_Able_ToReadExcelRules_And_GenerateFile()
     {
         var jiraMasterDto =
-            jiraTestScenarioReader.GetJiraMasterDtoFromMatrix(@"..\..\..\..\..\docs\Jira BUG Matrix.xlsx");
-        Assert.AreEqual(11, jiraMasterDto.Count);
+            await jiraTestScenarioReader.GetJiraMasterDtoFromMatrix(@"..\..\..\..\..\docs\Jira BUG Matrix.xlsx");
+        Assert.That(jiraMasterDto.Count, Is.EqualTo(11));
 
         var testResult = await testStartegyFactory.GetJiraTestStrategyResult(jiraMasterDto);
 
 
-
+        var writer = _serviceProvider.GetService<IJiraTestResultWriter>();
+        writer.WriteTestResult(testResult,"JiraTest.html");
 
     }
 }

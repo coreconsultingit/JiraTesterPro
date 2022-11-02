@@ -47,12 +47,12 @@ public class JiraTestStartegyFactory : IJiraTestStartegyFactory
        
         foreach (var test in orderedTests)
         {
-            if (test.IsSubTask && jiraGroup == test.GroupKey)
+            if (test.IsSubTask && jiraGroup.EqualsWithIgnoreCase(test.GroupKey))
             {
                 test.ParentIssueKey = parentIssueKey;
             }
 
-            if (jiraGroup == test.GroupKey && test.IssueType==issueType)
+            if (jiraGroup == test.GroupKey && test.IssueType.EqualsWithIgnoreCase(issueType))
             {
                 test.IssueKey = prevIssueKey;
             }

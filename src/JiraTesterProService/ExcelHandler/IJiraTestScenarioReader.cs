@@ -2,5 +2,5 @@
 
 public interface IJiraTestScenarioReader
 {
-    IList<JiraTestMasterDto> GetJiraMasterDtoFromMatrix(string path);
+    Task<IList<JiraTestMasterDto>> GetJiraMasterDtoFromMatrix(string path);
 }

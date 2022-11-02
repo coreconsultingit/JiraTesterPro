@@ -1,18 +1,27 @@
 ﻿using JiraTesterProData.Extensions;
 using System.IO;
+using System.Text;
+using JiraTesterProData.JiraMapper;
+using JiraTesterProService.JiraParser;
 
 namespace JiraTesterProService.ExcelHandler;
 
 public class JiraTestScenarioReader : IJiraTestScenarioReader
 {
     private ILogger<JiraTestScenarioReader> logger;
-    public JiraTestScenarioReader(ILogger<JiraTestScenarioReader> logger)
+    private IJiraCustomParser jiraCustomParser;
+    private IDictionary<string, JiraRootobject> dictProjectWithJira = new Dictionary<string, JiraRootobject>();
+    private IDictionary<string, JiraIssuetype> dictProjectWithIssueTypeJira = new Dictionary<string, JiraIssuetype>();
+    public JiraTestScenarioReader(ILogger<JiraTestScenarioReader> logger, IJiraCustomParser jiraCustomParser)
     {
         this.logger = logger;
+        this.jiraCustomParser = jiraCustomParser;
     }
 
-    public IList<JiraTestMasterDto> GetJiraMasterDtoFromMatrix(string path)
+    public  async Task<IList<JiraTestMasterDto>> GetJiraMasterDtoFromMatrix(string path)
     {
+      
+
         var lstJiraMasterDto = new List<JiraTestMasterDto>();
         using (var package = new ExcelPackage(File.Open(path,FileMode.Open)))
         {
@@ -35,6 +44,19 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
                     var columnlist = new List<string>();
 
                     var projectCode = worksheet.Cells[celladdress.Start.Row, celladdress.Start.Column+1].Value;
+
+                    if (projectCode == null)
+                    {
+                        logger.LogError($"No project code found at row {celladdress.Start.Row} column {celladdress.Start.Column + 1}");
+                    }
+
+                    var projectCodeVal = projectCode.GetNoneIfEmptyOrNull();
+
+                    if (!dictProjectWithJira.ContainsKey(projectCodeVal))
+                    {
+                        dictProjectWithJira.Add(projectCodeVal, await jiraCustomParser.GetParsedJiraRootBasedOnProject(projectCodeVal));
+                    }
+
                     var groupCode = worksheet.Cells[celladdress.Start.Row+1, celladdress.Start.Column].Value;
                     int iCounter = 1;
                     foreach (var firstRowCell in worksheet.Cells[celladdress.Start.Row+2, 1, celladdress.Start.Row+2, worksheet.Dimension.End.Column])
@@ -91,22 +113,69 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
                             IssueType = "BUG",
                             Action = GetAction(tbl.Rows[dictTestCell["Button (Transition)"]].ItemArray[i].GetNoneIfEmptyOrNull()),
                             ExpectedStatus = tbl.Rows[dictTestCell["Resulting Status"]].ItemArray[i].GetNoneIfEmptyOrNull(),
-                            Expectation = JiraTestStatus.Passed.ToString()
+                            Expectation = JiraTestStatus.Passed.ToString(),
+                            Status = tbl.Rows[dictTestCell["Button (Transition)"]].ItemArray[i].GetNoneIfEmptyOrNull(),
                         };
+
+                        PopulateRequiredFields(test);
 
                         lstJiraMasterDto.Add(test);
                     }
-                }
-
-
-               
-
-            }
+                } }
 
           
         }
 
         return lstJiraMasterDto;
+    }
+
+
+    public void PopulateRequiredFields(JiraTestMasterDto dto)
+    {
+        var root = dictProjectWithJira[dto.Project];
+        var key = $"{dto.Project}_{dto.IssueType}";
+        if (!dictProjectWithIssueTypeJira.ContainsKey(key))
+        {
+            var field = root.projects[0].issuetypes.Where(x => x.name.EqualsWithIgnoreCase(dto.IssueType))
+                .FirstOrDefault();
+            if (field == null)
+            {
+                logger.LogError($"Issue type {dto.IssueType} not found for {dto.Project}");
+                return;
+            }
+            
+            dictProjectWithIssueTypeJira.Add(key, field);
+        }
+
+
+        //Summary
+        var fielddefinition = dictProjectWithIssueTypeJira[key].fields;
+        if (fielddefinition.summary.required)
+        {
+            dto.Summary = "Test Summary";
+        }
+
+        if (fielddefinition.components.required)
+        {
+            dto.Component = fielddefinition.components.allowedValues[0].name;
+        }
+
+        var customFieldinput = new List<string>();
+        foreach (var customfield in fielddefinition.Customfield)
+        {
+            if (customfield.required && !customfield.hasDefaultValue)
+            {
+                if (customfield.allowedValues.Any())
+                {
+                    customFieldinput.Add($"{customfield.name}:{customfield.allowedValues[0].value}");
+                }
+                else
+                {
+                    customFieldinput.Add($"{customfield.name}:Test");
+                }
+            }
+        }
+        dto.CustomFieldInput = string.Join("|",customFieldinput);
     }
 
     private string GetAction(string val)

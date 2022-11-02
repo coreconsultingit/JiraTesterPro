@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using JiraTesterProData;
 using JiraTesterProService.ExcelHandler;
 using JiraTesterProService.FileHandler;
+using JiraTesterProService.JiraParser;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -34,6 +35,7 @@ namespace JiraTesterProService
             services.AddScoped<JiraUpdateIssueTestStrategyImpl>();
             services.AddScoped<IJiraTestStartegyFactory, JiraTestStartegyFactory>();
             services.AddScoped<IJiraTestResultWriter, JiraTestResultWriter>();
+            services.AddScoped<IJiraCustomParser, JiraParser.JiraCustomParser>();
 
             services.AddTransient(typeof(IFileGenerator<>), typeof(FileGenerator<>));
             
