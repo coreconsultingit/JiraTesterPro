@@ -89,7 +89,7 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
                             GroupKey = groupCode.GetNoneIfEmptyOrNull(),
                             OrderId = i,
                             IssueType = "BUG",
-                            Action = tbl.Rows[dictTestCell["Button (Transition)"]].ItemArray[i].GetNoneIfEmptyOrNull(),
+                            Action = GetAction(tbl.Rows[dictTestCell["Button (Transition)"]].ItemArray[i].GetNoneIfEmptyOrNull()),
                             ExpectedStatus = tbl.Rows[dictTestCell["Resulting Status"]].ItemArray[i].GetNoneIfEmptyOrNull(),
                             Expectation = JiraTestStatus.Passed.ToString()
                         };
