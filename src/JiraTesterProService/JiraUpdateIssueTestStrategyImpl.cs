@@ -56,12 +56,13 @@ public class JiraUpdateIssueTestStrategyImpl: JiraTestStrategy
             }
 
             //temp comment handling
-            var updateIssueMeta= await issueToUpdate.GetIssueFieldsEditMetadataAsync();
-             //if(issueToUpdate.)
-
-             //issueToUpdate.
-             await issueToUpdate.WorkflowTransitionAsync(jiraTestMasterDto
-                .Status); //= //issuestatus.Where(x => x.Name == jiraTestMasterDto.Status);
+            // var updateIssueMeta= await issueToUpdate.GetIssueFieldsEditMetadataAsync();
+            //if(issueToUpdate.)
+            // issueToUpdate.CustomFields.Add("Comment", "Test");
+            //issueToUpdate.
+            await issueToUpdate.WorkflowTransitionAsync(jiraTestMasterDto
+                .Status, new WorkflowTransitionUpdates() { Comment = "test" });
+            //= //issuestatus.Where(x => x.Name == jiraTestMasterDto.Status);
             jiraTestResult.TestPassed = true;
             jiraTestResult.JiraIssue = issueToUpdate;
             jiraTestResult.HasException = false;

@@ -50,6 +50,14 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
                         logger.LogError($"No project code found at row {celladdress.Start.Row} column {celladdress.Start.Column + 1}");
                     }
 
+                    var issueType = worksheet.Cells[celladdress.Start.Row+1, celladdress.Start.Column + 1].Value;
+
+                    if (issueType == null)
+                    {
+                        logger.LogError($"No issue type found at row {celladdress.Start.Row+1} column {celladdress.Start.Column + 1}");
+                    }
+
+
                     var projectCodeVal = projectCode.GetNoneIfEmptyOrNull();
 
                     if (!dictProjectWithJira.ContainsKey(projectCodeVal))
@@ -57,7 +65,7 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
                         dictProjectWithJira.Add(projectCodeVal, await jiraCustomParser.GetParsedJiraRootBasedOnProject(projectCodeVal));
                     }
 
-                    var groupCode = worksheet.Cells[celladdress.Start.Row+1, celladdress.Start.Column].Value;
+                    var groupCode = worksheet.Cells[celladdress.Start.Row+2, celladdress.Start.Column].Value;
                     int iCounter = 1;
                     foreach (var firstRowCell in worksheet.Cells[celladdress.Start.Row+2, 1, celladdress.Start.Row+2, worksheet.Dimension.End.Column])
                     {
@@ -70,7 +78,7 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
                         tbl.Columns.Add(columnname);
                         columnlist.Add(columnname);
                     }
-                    for (int rowNum = celladdress.Start.Row + 3; rowNum <= worksheet.Dimension.End.Row; rowNum++)
+                    for (int rowNum = celladdress.Start.Row + 4; rowNum <= worksheet.Dimension.End.Row; rowNum++)
                     {
                         var endcolumn = worksheet.Dimension.End.Column;
                         var wsRow = worksheet.Cells[rowNum, 1, rowNum, endcolumn];

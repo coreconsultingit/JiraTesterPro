@@ -16,23 +16,13 @@ public class JiraCustomParser : IJiraCustomParser
         this.jiraClientProvider = jiraClientProvider;
         this.logger = logger;
     }
-
+    //Gettingtransitions
+    //https://jiradev.ert.com/jira/rest/api/2/issue/ED-4810/transitions?expand=transitions.fields
     public async Task<JiraRootobject> GetParsedJiraRootBasedOnProject(string project)
     {
-        try
-        {
-            var wf = await jiraClientProvider.GetJiraClient().RestClient.ExecuteRequestAsync<JObject>(Method.GET, "rest/api/2/workflow/rule/config");
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
-     
+       
 
         var projectWithIssue = await jiraClientProvider.GetJiraClient().RestClient.ExecuteRequestAsync<JObject>(Method.GET, $"rest/api/2/issue/createmeta?projectKeys={project}&expand=projects.issuetypes.fields");
-
-
 
         var settings = new JsonSerializerSettings();
         
