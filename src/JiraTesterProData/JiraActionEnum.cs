@@ -7,7 +7,7 @@ public enum JiraActionEnum
 
 }
 
-public enum JiraTestStatus
+public enum JiraTestStatusEnum
 {
     Passed,
     Failed

@@ -17,6 +17,11 @@ public class JiraTestResultWriter : IJiraTestResultWriter
 
         builder.AppendFormat("<div class=\"container-fluid\"> <ul class=\"nav\" Style=\"background-image: linear-gradient(180deg, #4b0f41, grey); color:#fff\"><li class=\"nav-item\">" +
                              "TestResults run at :{0} {1}</li></ul>",DateTime.Now.ToLongDateString(), DateTime.Now.ToShortTimeString());
+        
+        
+        
+        
+        
         builder.AppendFormat("<table border=\"1\"><tr>");
 
         builder.AppendFormat($"<th>GroupKey</th>");

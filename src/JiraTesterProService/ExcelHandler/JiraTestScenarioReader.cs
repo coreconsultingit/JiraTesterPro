@@ -121,7 +121,7 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
                             IssueType = issueType.GetNoneIfEmptyOrNull(),
                             Action = GetAction(tbl.Rows[dictTestCell["Button (Transition)"]].ItemArray[i].GetNoneIfEmptyOrNull()),
                             ExpectedStatus = tbl.Rows[dictTestCell["Resulting Status"]].ItemArray[i].GetNoneIfEmptyOrNull(),
-                            Expectation = JiraTestStatus.Passed.ToString(),
+                            Expectation = JiraTestStatusEnum.Passed.ToString(),
                             Status = tbl.Rows[dictTestCell["Button (Transition)"]].ItemArray[i].GetNoneIfEmptyOrNull(),
                         };
 

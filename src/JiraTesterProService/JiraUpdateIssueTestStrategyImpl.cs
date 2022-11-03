@@ -66,8 +66,9 @@ public class JiraUpdateIssueTestStrategyImpl: JiraTestStrategy
             jiraTestResult.TestPassed = true;
             jiraTestResult.JiraIssue = issueToUpdate;
             jiraTestResult.HasException = false;
-
+            
             AssertExpectedStatus(issueToUpdate, jiraTestMasterDto, jiraTestResult);
+
         }
         catch (Exception e)
         {

@@ -8,8 +8,8 @@ namespace JiraTesterProData
         [Option('i', "inputjiratestfile", Required = false, HelpText = "Your Jira test input file")]
         public string? InputJiraTestFile { get; set; }
 
-        [Option('g', "generatejiratestfile", Required = false, HelpText = "Your Jira bug matrix")]
-        public bool? GenerateJiraTestInput { get; set; }
+        [Option('m', "masterbugfile", Required = false, HelpText = "Your jira bug file")]
+        public string? MasterBugFile { get; set; }
 
 
         [Option('j', "jiraurl", Required = false, HelpText = "Your jira url")]

@@ -10,6 +10,7 @@ using JiraTesterProService.FileHandler;
 using Microsoft.Extensions.Configuration;
 using JiraTesterProService.ExcelHandler;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Finance.Implementations;
+using System;
 
 namespace JiraTesterProMain;
 
@@ -41,26 +42,53 @@ class Program
             Log.Logger.Information(opts.ToString());
             var fileFactory = serviceProvider.GetService<IFileFactory>();
             var config = serviceProvider.GetService<IConfiguration>();
-            var testFileData =
-                await fileFactory.GetDataTableFromFile(new FileInfo(opts.InputJiraTestFile ??
-                                                                    config.GetValue<string>("InputJiraTestFile")));
+            var inputJiraTestFile = opts.InputJiraTestFile ??
+                                    config.GetValue<string>("InputJiraTestFile");
 
+            var jirabugMasterFile = opts.InputJiraTestFile ??
+                                    config.GetValue<string>("MasterBugFile");
 
-            var parser = serviceProvider.GetService<IDataTableParser<JiraTestMasterDto>>();
-
-            var parsedItems = parser.ConvertDataTableToList(testFileData, null);
-            var testStartegyFactory = serviceProvider.GetService<IJiraTestStartegyFactory>();
-            if (parsedItems.lstValidationMessage.Any())
+            if (inputJiraTestFile == null && jirabugMasterFile == null)
             {
-                foreach (var message in parsedItems.lstValidationMessage)
-                {
-                    Log.Logger.Error(message);
-                }
-
-                throw new Exception("Error parsing the file");
+                Log.Logger.Error("Either one of bug or test file should be provided");
             }
 
-            var testResult = await testStartegyFactory.GetJiraTestStrategyResult(parsedItems.lstItems);
+            IList<JiraTestMasterDto> lstJiraTestItems = new List<JiraTestMasterDto>();
+            if (jirabugMasterFile == null)
+            {
+                var testFileData =
+                    await fileFactory.GetDataTableFromFile(new FileInfo(inputJiraTestFile));
+
+
+
+                var parser = serviceProvider.GetService<IDataTableParser<JiraTestMasterDto>>();
+
+                var parsedItems = parser.ConvertDataTableToList(testFileData, null);
+                if (parsedItems.lstValidationMessage.Any())
+                {
+                    foreach (var message in parsedItems.lstValidationMessage)
+                    {
+                        Log.Logger.Error(message);
+                    }
+
+                    throw new Exception("Error parsing the file");
+                }
+
+                lstJiraTestItems = parsedItems.lstItems.ToList();
+
+
+            }
+            else
+            {
+                var jiraTestScenarioReader = serviceProvider.GetService<IJiraTestScenarioReader>();
+                lstJiraTestItems = await jiraTestScenarioReader.GetJiraMasterDtoFromMatrix(jirabugMasterFile);
+            }
+
+            
+            var testStartegyFactory = serviceProvider.GetService<IJiraTestStartegyFactory>();
+
+            var testResult = await testStartegyFactory.GetJiraTestStrategyResult(lstJiraTestItems);
+
             var writer = serviceProvider.GetService<IJiraTestResultWriter>();
             writer.WriteTestResult(testResult,
                 opts.OutputJiraTestFile ?? config.GetValue<string>("OutputJiraTestFile"));
