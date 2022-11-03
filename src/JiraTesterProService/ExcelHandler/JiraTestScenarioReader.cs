@@ -123,6 +123,7 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
                             ExpectedStatus = tbl.Rows[dictTestCell["Resulting Status"]].ItemArray[i].GetNoneIfEmptyOrNull(),
                             Expectation = JiraTestStatusEnum.Passed.ToString(),
                             Status = tbl.Rows[dictTestCell["Button (Transition)"]].ItemArray[i].GetNoneIfEmptyOrNull(),
+                            Scenario = tbl.Rows[dictTestCell["Scenario/Step"]].ItemArray[i].GetNoneIfEmptyOrNull()
                         };
 
                         PopulateRequiredFields(test);

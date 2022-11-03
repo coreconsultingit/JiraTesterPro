@@ -26,7 +26,7 @@ namespace JiraTesterProTestFixture
                     }
                 }
             };
-            var result = JiraTestOutput.GetJiraOutPutTemplate(jratestResult,new { title = "My Post", body = "test" });
+            var result = JiraTestOutputGenerator.GetJiraOutPutTemplate(jratestResult,new { title = "My Post", body = "test" });
             Assert.IsNotNull(result);
         }
     }

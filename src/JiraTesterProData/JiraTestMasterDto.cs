@@ -91,6 +91,8 @@ public class JiraTestMasterDto
 {
     public string ParentIssueKey{ get; set; }
 
+    public string Scenario { get; set; }
+
     public string IssueKey { get; set; }
 
     public string GroupKey { get; set; }
