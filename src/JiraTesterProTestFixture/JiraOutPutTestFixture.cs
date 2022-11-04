@@ -20,12 +20,23 @@ namespace JiraTesterProTestFixture
             var jiraoutput = _serviceProvider.GetService<IJiraTestOutputGenerator>();
             var jratestResult = new List<JiraTestResult>()
             {
-                new JiraTestResult()
+                new()
                 {
                     ExceptionMessage = "",HasException = false,TestPassed = true,JiraTestMasterDto = new JiraTestMasterDto()
                     {
-                        Action = JiraActionEnum.Create.ToString(),Expectation = JiraTestStatusEnum.Passed.ToString()
-                    }
+                        Action = JiraActionEnum.Create.ToString(),Expectation = JiraTestStatusEnum.Passed.ToString(), StepId = 1,
+                        
+
+                    }, Comment = "Test"
+                },
+                new()
+                {
+                    ExceptionMessage = "Exception",HasException = true,TestPassed = false,JiraTestMasterDto = new JiraTestMasterDto()
+                    {
+                        Action = JiraActionEnum.Create.ToString(),Expectation = JiraTestStatusEnum.Passed.ToString(), StepId = 2,
+
+
+                    }, Comment = "Test1"
                 }
             };
             var result = jiraoutput.GetJiraOutPutTemplate(jratestResult,new JiraMetaDataDto()

@@ -21,8 +21,8 @@ namespace JiraTesterProService.OutputTemplate
                 assemblyversion,
                 TestResults = lstTestResult,
                 TotalTest = lstTestResult.Count(),
-                PassedTest = lstTestResult.Where(x=>x.TestPassed),
-                FailedTest = lstTestResult.Where(x=>!x.TestPassed),
+                PassedTest = lstTestResult.Where(x=>x.TestPassed).Count(),
+                FailedTest = lstTestResult.Where(x=>!x.TestPassed).Count(),
                 JiraMetaData = metaData
             };
            
@@ -45,12 +45,41 @@ namespace JiraTesterProService.OutputTemplate
             return @"<div  class=""row"">
 <div class=""col-sm border rounded"">
     <table class=""table""><caption>Test Report</caption><thead>
-<tr><th>StepId</th><th>ExecutedScenario</th><th>Action</th><th>Expected Result</th><th>Actual Result</th><th>Pass/Fail</th><th>IssueKey</th><th>ScreenShots</th><th>Comments</th>
-</tr> </thead>
+<tr>
+<th>StepId</th>
+<th>ExecutedScenario</th>
+<th>Action</th>
+<th> Jira Status</th> 
+<th>Expected Result</th>
+<th>Actual Result</th>
+<th>Pass/Fail</th>
+<th>IssueKey</th>
+<th>ScreenShots</th>
+<th>Exception</th>
+<th>Comments</th>
+
+</tr> 
+</thead>
 <tbody>
 {{#each TestResults}}
-<tr>
+{{#if TestPassed}}
+<tr class=""alert alert-success"">
+{{else}}
+<tr class=""alert alert-danger"">
+{{/if}}
+<td>{{JiraTestMasterDto.StepId}}</td>
+<td>{{JiraTestMasterDto.Scenario}}</td>
+<td>{{JiraTestMasterDto.Action}}</td>
+<td>{{JiraTestMasterDto.Status}}</td>
+<td>{{JiraTestMasterDto.Expectation}}</td>
+<td>{{JiraIssue?.Status}}</td>
 <td>{{TestPassed}}</td>
+<td>{{JiraIssue?.Key}}</td>
+<th>{{ScreenShot}}</th>
+<th>{{Exception}}</th>
+<th>{{Comment}}</th>
+
+
 </tr>
 
 {{/each}}
@@ -76,13 +105,17 @@ namespace JiraTesterProService.OutputTemplate
 <tr><th>TestRunBy</th> <th>{{JiraMetaData.TestRunBy}}</th>  </tr>
 </thead><tbody></tbody></table>
 </div>
-
 <div class=""col-sm rounded"">
-    <table class=""table""><caption>Execution Details</caption><thead><tr><th>Total Tests</th> <th>{{TotalTest}}</th></tr> </thead><tbody><tr><td></td></tr></tbody></table>
+    <table class=""table""><caption>Execution Details</caption>
+<thead>
+<tr><th>Total Tests</th> <th>{{TotalTest}}</th></tr> 
+<tr><th>Passed Tests</th> <th>{{PassedTest}}</th></tr> 
+<tr class=""alert alert-danger""><th>Failed Tests</th> <th>{{FailedTest}}</th></tr> 
+</thead>
+<tbody><tr><td></td></tr></tbody></table>
 </div>
-
 <div class=""col-sm rounded"">
-    <table class=""table""><caption>Test Automation Details</caption><tbody><tr><td>JiraTestProVersion</td><td>{{assemblyversion}}</td></tr></tbody></table>
+    <table class=""table""><caption>Test Automation Details</caption><thead><th>JiraTestProVersion</th><th>{{assemblyversion}}</th></thead><tbody><tr><td></td><td></td></tr></tbody></table>
 </div>
 </div>";
         }

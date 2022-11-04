@@ -115,6 +115,7 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
                     {
                         var test = new JiraTestMasterDto()
                         {
+                            StepId = i,
                             Project = projectCode.GetNoneIfEmptyOrNull(),
                             GroupKey = groupCode.GetNoneIfEmptyOrNull(),
                             OrderId = i,
