@@ -8,9 +8,9 @@ using HandlebarsDotNet;
 
 namespace JiraTesterProService.OutputTemplate
 {
-    public  static class JiraTestOutputGenerator
+    public  class JiraTestOutputGenerator: IJiraTestOutputGenerator
     {
-        public static string GetJiraOutPutTemplate(IList<JiraTestResult> lstTestResult, object data)
+        public string GetJiraOutPutTemplate(IList<JiraTestResult> lstTestResult, JiraMetaDataDto metaData)
         {
 
             string head = HeadHtml();
@@ -22,12 +22,12 @@ namespace JiraTesterProService.OutputTemplate
                 TestResults = lstTestResult,
                 TotalTest = lstTestResult.Count(),
                 PassedTest = lstTestResult.Where(x=>x.TestPassed),
-                FailedTest = lstTestResult.Where(x=>!x.TestPassed)
+                FailedTest = lstTestResult.Where(x=>!x.TestPassed),
+                JiraMetaData = metaData
             };
-            string source =
-                $"Jira TestPro Code version {assemblyversion}";
+           
             var template = Handlebars.Compile($"<!DOCTYPE html><html languate=\"en\">{head}<div class=\"container-fluid\"><body> " +
-                                              $"{GetHeaderSections()}{GetTestReportSection()}{source} </div></body></html>");
+                                              $"{GetHeaderSections()}{GetTestReportSection()} </div></body></html>");
 
 
 
@@ -40,7 +40,7 @@ namespace JiraTesterProService.OutputTemplate
 
         }
 
-        public static string GetTestReportSection()
+        private static string GetTestReportSection()
         {
             return @"<div  class=""row"">
 <div class=""col-sm border rounded"">
@@ -64,15 +64,21 @@ namespace JiraTesterProService.OutputTemplate
 
 
 
-        public static string GetHeaderSections()
+        private  string GetHeaderSections()
         {
             return @" <div  class=""row gx-10"">
 <div class=""col-sm rounded"">
-    <table class=""table""><caption>System Summary</caption><thead><tr><th>Test</th></tr> </thead><tbody></tbody></table>
+    <table class=""table""><caption>System Summary</caption><thead>
+<tr><th>Jira Version</th> <th>{{JiraMetaData.JiraVersion}}</th>  </tr> 
+<tr><th>Jira Url</th> <th>{{JiraMetaData.JiraUrl}}</th>  </tr>
+<tr><th>TestFileName</th> <th>{{JiraMetaData.TestFileName}}</th>  </tr> 
+<tr><th>JiraAccount</th> <th>{{JiraMetaData.JiraAccount}}</th>  </tr>
+<tr><th>TestRunBy</th> <th>{{JiraMetaData.TestRunBy}}</th>  </tr>
+</thead><tbody></tbody></table>
 </div>
 
 <div class=""col-sm rounded"">
-    <table class=""table""><caption>Execution Details</caption><thead><tr><th>Total Tests</th></tr> </thead><tbody><tr><td>{{TotalTest}}</td></tr></tbody></table>
+    <table class=""table""><caption>Execution Details</caption><thead><tr><th>Total Tests</th> <th>{{TotalTest}}</th></tr> </thead><tbody><tr><td></td></tr></tbody></table>
 </div>
 
 <div class=""col-sm rounded"">
@@ -82,7 +88,7 @@ namespace JiraTesterProService.OutputTemplate
         }
 
 
-        public static string HeadHtml()
+        private string HeadHtml()
         {
             return @"<head>
 <link rel=""stylesheet"" href=""https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"" integrity=""sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"" crossorigin=""anonymous"">

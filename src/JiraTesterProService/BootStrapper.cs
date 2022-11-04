@@ -8,6 +8,7 @@ using JiraTesterProService.ExcelHandler;
 using JiraTesterProService.FileHandler;
 using JiraTesterProService.ImageHandler;
 using JiraTesterProService.JiraParser;
+using JiraTesterProService.OutputTemplate;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -49,6 +50,7 @@ namespace JiraTesterProService
             services.AddScoped<IFileFactory, FileFactory>();
             services.AddScoped<IFileHandlerFactory, FileHandlerFactory>();
             services.AddScoped<IScreenCaptureService, ScreenCaptureService>();
+            services.AddScoped<IJiraTestOutputGenerator, JiraTestOutputGenerator>();
 
             services.AddScoped<DelimettedFileService>()
                 .AddScoped<IFileService, DelimettedFileService>(s => s.GetService<DelimettedFileService>());

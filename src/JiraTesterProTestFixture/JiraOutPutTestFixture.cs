@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Atlassian.Jira;
 using JiraTesterProData;
 using JiraTesterProService.OutputTemplate;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace JiraTesterProTestFixture
 {
@@ -16,6 +17,7 @@ namespace JiraTesterProTestFixture
         [Test]
         public void GetFinalHtmlJiraOutPut()
         {
+            var jiraoutput = _serviceProvider.GetService<IJiraTestOutputGenerator>();
             var jratestResult = new List<JiraTestResult>()
             {
                 new JiraTestResult()
@@ -26,7 +28,14 @@ namespace JiraTesterProTestFixture
                     }
                 }
             };
-            var result = JiraTestOutputGenerator.GetJiraOutPutTemplate(jratestResult,new { title = "My Post", body = "test" });
+            var result = jiraoutput.GetJiraOutPutTemplate(jratestResult,new JiraMetaDataDto()
+            {
+                JiraUrl = "http:\\jiratest",
+                JiraVersion = "1.0.0",
+                TestFileName="MatrixFile",
+                JiraAccount = "JiraAccountUser"
+
+            });
             Assert.IsNotNull(result);
         }
     }
