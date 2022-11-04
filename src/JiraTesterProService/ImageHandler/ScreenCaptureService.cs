@@ -12,11 +12,11 @@ public class ScreenCaptureService : IScreenCaptureService
         this.logger = logger;
     }
 
-    public async Task<bool> CaptureScreenShot(ScreenShotInputDto inputDto)
+    public async Task<bool> CaptureScreenShot(ScreenShotInputDto inputDto, ScreenShotLogInScreenDto loginDto)
     {
         try
         {
-            var screenshot =  ScreenshotUrlAsync(inputDto).Result;
+            var screenshot =  await ScreenshotUrlAsync(inputDto, loginDto);
             await File.WriteAllBytesAsync(inputDto.FilePath, screenshot);
             
         }
@@ -28,7 +28,8 @@ public class ScreenCaptureService : IScreenCaptureService
         return true;
     }
 
-    private async Task<byte[]> ScreenshotUrlAsync(ScreenShotInputDto inputDto)
+    private async Task<byte[]> ScreenshotUrlAsync(ScreenShotInputDto inputDto,
+        ScreenShotLogInScreenDto screenShotLogInScreenDto)
     {
 
         // First download the browser (this will only happen once)
@@ -47,11 +48,11 @@ public class ScreenCaptureService : IScreenCaptureService
         try
         {
 
-            if (!loginsucessfull  && ! string.IsNullOrEmpty(inputDto.LoginUrl))
+            if (!loginsucessfull  && screenShotLogInScreenDto!=null)
             {
-                await page.GoToAsync(inputDto.LoginUrl);
-                await page.TypeAsync("#login-form-username", inputDto.UserName);
-                await page.TypeAsync("#login-form-password", inputDto.Password);
+                await page.GoToAsync(screenShotLogInScreenDto.LoginUrl);
+                await page.TypeAsync("#login-form-username", screenShotLogInScreenDto.UserName);
+                await page.TypeAsync("#login-form-password", screenShotLogInScreenDto.Password);
                 await page.ClickAsync("#login");
                 await page.WaitForNavigationAsync();
 
