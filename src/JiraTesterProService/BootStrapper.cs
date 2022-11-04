@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using JiraTesterProData;
 using JiraTesterProService.ExcelHandler;
 using JiraTesterProService.FileHandler;
+using JiraTesterProService.ImageHandler;
 using JiraTesterProService.JiraParser;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -47,6 +48,7 @@ namespace JiraTesterProService
             //services.AddScoped<IExcelWriter, ExcelWriter>();
             services.AddScoped<IFileFactory, FileFactory>();
             services.AddScoped<IFileHandlerFactory, FileHandlerFactory>();
+            services.AddScoped<IScreenCaptureService, ScreenCaptureService>();
 
             services.AddScoped<DelimettedFileService>()
                 .AddScoped<IFileService, DelimettedFileService>(s => s.GetService<DelimettedFileService>());
