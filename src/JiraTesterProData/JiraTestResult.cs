@@ -11,10 +11,12 @@ public class JiraTestResult
   public bool TestPassed { get; set; }
   public string ScreenShot { get; set; }
   public string Comment { get; set; }
+  public string ExceptionMessage { get; set; }
+  public Issue?  JiraIssue { get; set; }
 
-    public string ExceptionMessage { get; set; }
+  public string ProjectName { get; set; }
 
-    public Issue?  JiraIssue { get; set; }
+  public string JiraIssueUrl { get; set; }
 }
 public class ReconConfig
 {

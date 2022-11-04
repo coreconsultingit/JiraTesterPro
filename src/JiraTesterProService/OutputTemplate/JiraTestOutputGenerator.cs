@@ -5,14 +5,20 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using HandlebarsDotNet;
+using JiraTesterProService.JiraParser;
 
 namespace JiraTesterProService.OutputTemplate
 {
     public  class JiraTestOutputGenerator: IJiraTestOutputGenerator
     {
-        public string GetJiraOutPutTemplate(IList<JiraTestResult> lstTestResult, JiraMetaDataDto metaData)
+        private IJiraCustomParser jiraCustomParser;
+        public JiraTestOutputGenerator(IJiraCustomParser jiraCustomParser)
         {
+            this.jiraCustomParser = jiraCustomParser;
+        }
 
+        public string GetJiraOutPutTemplate(IList<JiraTestResult> lstTestResult)
+        {
             string head = HeadHtml();
 
             var assemblyversion = Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "1.0.0";
@@ -23,8 +29,9 @@ namespace JiraTesterProService.OutputTemplate
                 TotalTest = lstTestResult.Count(),
                 PassedTest = lstTestResult.Where(x=>x.TestPassed).Count(),
                 FailedTest = lstTestResult.Where(x=>!x.TestPassed).Count(),
-                JiraMetaData = metaData
-            };
+                JiraMetaData = jiraCustomParser.GetJiraMetaData()
+
+        };
            
             var template = Handlebars.Compile($"<!DOCTYPE html><html languate=\"en\">{head}<div class=\"container-fluid\"><body> " +
                                               $"{GetHeaderSections()}{GetTestReportSection()} </div></body></html>");
@@ -42,18 +49,27 @@ namespace JiraTesterProService.OutputTemplate
 
         private static string GetTestReportSection()
         {
+
+
             return @"<div  class=""row"">
 <div class=""col-sm border rounded"">
-    <table class=""table""><caption>Test Report</caption><thead>
+    
+<div class=""table-responsive"">
+
+
+<table class=""table table-hover""><caption>Test Report</caption>
+<thead class=""thead-light"">
 <tr>
 <th>StepId</th>
+<th>Project</th>
+<th>IssueType</th>
 <th>ExecutedScenario</th>
 <th>Action</th>
-<th> Jira Status</th> 
 <th>Expected Result</th>
 <th>Actual Result</th>
 <th>Pass/Fail</th>
 <th>IssueKey</th>
+<th>Expectation</th>
 <th>ScreenShots</th>
 <th>Exception</th>
 <th>Comments</th>
@@ -63,29 +79,29 @@ namespace JiraTesterProService.OutputTemplate
 <tbody>
 {{#each TestResults}}
 {{#if TestPassed}}
-<tr class=""alert alert-success"">
+<tr class=""table-success"">
 {{else}}
-<tr class=""alert alert-danger"">
+<tr class=""table-danger"">
 {{/if}}
 <td>{{JiraTestMasterDto.StepId}}</td>
+<td>{{ProjectName}}</td>
 <td>{{JiraTestMasterDto.Scenario}}</td>
+<td>{{JiraTestMasterDto.IssueType}}</td>
 <td>{{JiraTestMasterDto.Action}}</td>
 <td>{{JiraTestMasterDto.Status}}</td>
-<td>{{JiraTestMasterDto.Expectation}}</td>
-<td>{{JiraIssue?.Status}}</td>
+<td>{{JiraIssue.Status}}</td>
 <td>{{TestPassed}}</td>
-<td>{{JiraIssue?.Key}}</td>
+<td><a href=""{{JiraIssueUrl}}"">{{JiraIssue.Key}}</a></td>
+<td>{{JiraTestMasterDto.Expectation}}</td>
 <th>{{ScreenShot}}</th>
 <th>{{Exception}}</th>
 <th>{{Comment}}</th>
-
-
 </tr>
-
 {{/each}}
 </tbody>
 
 </table>
+</div>
 </div>
 </div>";
         }
@@ -100,7 +116,6 @@ namespace JiraTesterProService.OutputTemplate
     <table class=""table""><caption>System Summary</caption><thead>
 <tr><th>Jira Version</th> <th>{{JiraMetaData.JiraVersion}}</th>  </tr> 
 <tr><th>Jira Url</th> <th>{{JiraMetaData.JiraUrl}}</th>  </tr>
-<tr><th>TestFileName</th> <th>{{JiraMetaData.TestFileName}}</th>  </tr> 
 <tr><th>JiraAccount</th> <th>{{JiraMetaData.JiraAccount}}</th>  </tr>
 <tr><th>TestRunBy</th> <th>{{JiraMetaData.TestRunBy}}</th>  </tr>
 </thead><tbody></tbody></table>
@@ -109,8 +124,8 @@ namespace JiraTesterProService.OutputTemplate
     <table class=""table""><caption>Execution Details</caption>
 <thead>
 <tr><th>Total Tests</th> <th>{{TotalTest}}</th></tr> 
-<tr><th>Passed Tests</th> <th>{{PassedTest}}</th></tr> 
-<tr class=""alert alert-danger""><th>Failed Tests</th> <th>{{FailedTest}}</th></tr> 
+<tr class=""table-danger""><th>Passed Tests</th> <th>{{PassedTest}}</th></tr> 
+<tr class=""table-success""><th>Failed Tests</th> <th>{{FailedTest}}</th></tr> 
 </thead>
 <tbody><tr><td></td></tr></tbody></table>
 </div>

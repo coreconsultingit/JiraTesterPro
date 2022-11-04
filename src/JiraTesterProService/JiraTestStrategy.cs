@@ -28,6 +28,10 @@ namespace JiraTesterProService
             }
         }
 
+        protected void SetJiraIssueUrl(Issue issue, JiraTestResult jiraTestResult,string jiraurl)
+        {
+            jiraTestResult.JiraIssueUrl = $"{jiraurl}browse/{issue.Key}";
+        }
         protected  void AssertExpectedStatus(Issue issue, JiraTestMasterDto jiraTestMasterDto, JiraTestResult jiraTestResult)
         {
             jiraTestResult.HasException = issue.Status.Name == jiraTestMasterDto.ExpectedStatus;

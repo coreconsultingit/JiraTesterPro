@@ -78,7 +78,7 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
                         tbl.Columns.Add(columnname);
                         columnlist.Add(columnname);
                     }
-                    for (int rowNum = celladdress.Start.Row + 4; rowNum <= worksheet.Dimension.End.Row; rowNum++)
+                    for (int rowNum = celladdress.Start.Row + 3; rowNum <= worksheet.Dimension.End.Row; rowNum++)
                     {
                         var endcolumn = worksheet.Dimension.End.Column;
                         var wsRow = worksheet.Cells[rowNum, 1, rowNum, endcolumn];

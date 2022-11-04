@@ -39,14 +39,7 @@ namespace JiraTesterProTestFixture
                     }, Comment = "Test1"
                 }
             };
-            var result = jiraoutput.GetJiraOutPutTemplate(jratestResult,new JiraMetaDataDto()
-            {
-                JiraUrl = "http:\\jiratest",
-                JiraVersion = "1.0.0",
-                TestFileName="MatrixFile",
-                JiraAccount = "JiraAccountUser"
-
-            });
+            var result = jiraoutput.GetJiraOutPutTemplate(jratestResult);
             Assert.IsNotNull(result);
         }
     }

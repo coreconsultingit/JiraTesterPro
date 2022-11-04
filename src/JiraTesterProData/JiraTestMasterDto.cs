@@ -121,5 +121,5 @@ public class JiraTestMasterDto
     public string ExpectedSubTaskList { get; set; }
 
     public bool IsSubTask { get; set; }
-
+    
 }

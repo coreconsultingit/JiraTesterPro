@@ -27,8 +27,12 @@ public class JiraTestScenarioReaderTestFixture: JiraTestFixtureBase
 
 
         var writer = _serviceProvider.GetService<IJiraTestResultWriter>();
-        Assert.DoesNotThrow(()=>writer.WriteTestResult(testResult,"JiraTest.html"));
-       
+
+        var result = await writer.WriteTestResult(testResult, "JiraTest.html");
+
+        Assert.IsTrue(result);
+        
+        
 
     }
 }

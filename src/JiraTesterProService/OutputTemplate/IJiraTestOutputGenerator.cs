@@ -2,5 +2,5 @@
 
 public interface IJiraTestOutputGenerator
 {
-    string GetJiraOutPutTemplate(IList<JiraTestResult> lstTestResult, JiraMetaDataDto metaData);
+    string GetJiraOutPutTemplate(IList<JiraTestResult> lstTestResult);
 }

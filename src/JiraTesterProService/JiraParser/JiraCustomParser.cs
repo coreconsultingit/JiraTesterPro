@@ -21,7 +21,6 @@ public class JiraCustomParser : IJiraCustomParser
     public async Task<JiraRootobject> GetParsedJiraRootBasedOnProject(string project)
     {
        
-
         var projectWithIssue = await jiraClientProvider.GetJiraClient().RestClient.ExecuteRequestAsync<JObject>(Method.GET, $"rest/api/2/issue/createmeta?projectKeys={project}&expand=projects.issuetypes.fields");
 
         var settings = new JsonSerializerSettings();
@@ -59,5 +58,18 @@ public class JiraCustomParser : IJiraCustomParser
         return projectWithIssueString;
 
 
+    }
+
+    public JiraMetaDataDto GetJiraMetaData()
+    {
+        var jiraClient = jiraClientProvider.GetJiraClient();
+        var jiraMeta = new JiraMetaDataDto()
+        {
+            JiraVersion = jiraClient.ServerInfo.ToString(),
+            JiraUrl = jiraClient.RestClient.Url,
+            JiraAccount = jiraClientProvider.GetUserName,
+
+        };
+        return jiraMeta;
     }
 }

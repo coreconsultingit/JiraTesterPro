@@ -75,8 +75,6 @@ class Program
                 }
 
                 lstJiraTestItems = parsedItems.lstItems.ToList();
-
-
             }
             else
             {
@@ -90,7 +88,8 @@ class Program
             var testResult = await testStartegyFactory.GetJiraTestStrategyResult(lstJiraTestItems);
 
             var writer = serviceProvider.GetService<IJiraTestResultWriter>();
-            writer.WriteTestResult(testResult,
+
+            await writer.WriteTestResult(testResult,
                 opts.OutputJiraTestFile ?? config.GetValue<string>("OutputJiraTestFile"));
         }
         catch (Exception e)

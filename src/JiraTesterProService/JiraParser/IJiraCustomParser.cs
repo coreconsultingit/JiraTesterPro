@@ -5,4 +5,6 @@ namespace JiraTesterProService.JiraParser;
 public interface IJiraCustomParser
 {
     Task<JiraRootobject> GetParsedJiraRootBasedOnProject(string project);
+
+    JiraMetaDataDto GetJiraMetaData();
 }

@@ -32,4 +32,6 @@ public class JiraClientProvider : IJiraClientProvider
             
             jiraurl, username, passwordtoken, settings);
     }
+
+    public string GetUserName => username;
 }
