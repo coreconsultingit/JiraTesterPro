@@ -61,6 +61,7 @@ namespace JiraTesterProService
             services.AddScoped(typeof(IDataTableParser<>), typeof(DataTableParser<>));
 
             RegisterJiraClientProvider(services, configuration, options);
+            RegisterJiraFileConfigProvider(services, configuration, options);
             ServiceProvider = services.BuildServiceProvider();
         }
 
@@ -72,6 +73,18 @@ namespace JiraTesterProService
 
 
             services.AddScoped<IJiraClientProvider, JiraClientProvider>(x=> new JiraClientProvider(options.Username??username, options.Password??passwordtoken,options.JiraUrl??jiraurl));
+        }
+
+        private static void RegisterJiraFileConfigProvider(IServiceCollection services, IConfiguration configuration,
+            JiraTesterCommandLineOptions options)
+        {
+            var inputJiraTestFile = configuration.GetValue<string>("InputJiraTestFile");
+            var outPutJiraTestFilePath = configuration.GetValue<string>("OutputJiraTestFilePath");
+            var masterTestFile = configuration.GetValue<string>("MasterTestFile");
+
+
+            services.AddScoped<JiraFileConfigProvider>(x => new JiraFileConfigProvider(options.OutputJiraTestFilePath ?? outPutJiraTestFilePath,
+                options.MasterTestFile ?? masterTestFile, options.InputJiraTestFile ?? inputJiraTestFile,ServiceProvider.GetService<ILogger<JiraFileConfigProvider>>()));
         }
     }
 }

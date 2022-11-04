@@ -8,5 +8,6 @@ namespace JiraTesterProService
         Jira GetJiraClient(JiraRestClientSettings? settings=null);
 
         string GetUserName { get; }
+        string GetPassword { get; }
     }
 }

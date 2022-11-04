@@ -9,7 +9,7 @@ public class JiraTestResult
     public bool HasException { get; set; }
 
   public bool TestPassed { get; set; }
-  public string ScreenShot { get; set; }
+  
   public string Comment { get; set; }
   public string ExceptionMessage { get; set; }
   public Issue?  JiraIssue { get; set; }
@@ -17,6 +17,7 @@ public class JiraTestResult
   public string ProjectName { get; set; }
 
   public string JiraIssueUrl { get; set; }
+  public string ScreenShotPath { get; set; }
 }
 public class ReconConfig
 {

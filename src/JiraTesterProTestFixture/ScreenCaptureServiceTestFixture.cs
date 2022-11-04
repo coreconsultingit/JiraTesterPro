@@ -17,11 +17,15 @@ namespace JiraTesterProTestFixture
         public async Task Is_Able_To_TakeScreenCapture()
         {
             var screencaptureService = _serviceProvider.GetService<IScreenCaptureService>();
+
+            await screencaptureService.SetStartSession(null);
             var result = await screencaptureService.CaptureScreenShot(new ScreenShotInputDto()
             {
-                TestUrl = "https://jiradev.ert.com/jira", FilePath = "C:\\temp\\testscreenshot.png"
-            }, null);
+                TestUrl = "https://google.com", FilePath = "C:\\temp\\testscreenshot.png"
+            });
             Assert.IsTrue(result);
+
+            await screencaptureService.CloseBrowserAndPage();
         }
     }
 }

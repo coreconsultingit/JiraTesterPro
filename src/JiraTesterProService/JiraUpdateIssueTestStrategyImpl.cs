@@ -1,5 +1,7 @@
 ﻿using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
+using JiraTesterProService.ImageHandler;
+using JiraTesterProService.JiraParser;
 using Microsoft.Extensions.Logging;
 
 namespace JiraTesterProService;
@@ -8,8 +10,7 @@ public class JiraUpdateIssueTestStrategyImpl: JiraTestStrategy
 {
     private IJiraClientProvider jiraClientProvider;
     private ILogger<JiraCreateIssueTestStrategyImpl> logger;
-
-    public JiraUpdateIssueTestStrategyImpl(IJiraClientProvider jiraClientProvider, ILogger<JiraCreateIssueTestStrategyImpl> logger)
+    public JiraUpdateIssueTestStrategyImpl(IJiraClientProvider jiraClientProvider, ILogger<JiraCreateIssueTestStrategyImpl> logger, JiraFileConfigProvider fileConfigProvider, IScreenCaptureService screenCaptureService) : base(jiraClientProvider, fileConfigProvider, screenCaptureService, logger)
     {
         this.jiraClientProvider = jiraClientProvider;
         this.logger = logger;
@@ -25,6 +26,7 @@ public class JiraUpdateIssueTestStrategyImpl: JiraTestStrategy
 
         try
         {
+            await InitializeDictionary(jiraTestMasterDto, jiraTestResult);
             logger.LogInformation("Started updating jira with the dto {@jiraTestMasterDto}", jiraTestMasterDto);
             Issue issueToUpdate = null;
             if (!string.IsNullOrEmpty(jiraTestMasterDto.IssueKey))
@@ -59,14 +61,14 @@ public class JiraUpdateIssueTestStrategyImpl: JiraTestStrategy
             // var updateIssueMeta= await issueToUpdate.GetIssueFieldsEditMetadataAsync();
             //if(issueToUpdate.)
             // issueToUpdate.CustomFields.Add("Comment", "Test");
-            //issueToUpdate.
+            
             await issueToUpdate.WorkflowTransitionAsync(jiraTestMasterDto
                 .Status, new WorkflowTransitionUpdates() { Comment = "test" });
             //= //issuestatus.Where(x => x.Name == jiraTestMasterDto.Status);
             jiraTestResult.TestPassed = true;
             jiraTestResult.JiraIssue = issueToUpdate;
             jiraTestResult.HasException = false;
-            SetJiraIssueUrl(issueToUpdate, jiraTestResult, jiraClient.Url);
+            SetJiraIssueUrl(jiraTestResult, jiraClient.Url);
             AssertExpectedStatus(issueToUpdate, jiraTestMasterDto, jiraTestResult);
 
         }
@@ -77,6 +79,8 @@ public class JiraUpdateIssueTestStrategyImpl: JiraTestStrategy
             jiraTestResult.TestPassed = jiraTestMasterDto.Expectation == "Failed";
 
         }
+
+        await TakeScreenShotAfterAction(jiraTestResult);
 
         return jiraTestResult;
     }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PuppeteerSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,8 @@ namespace JiraTesterProService.ImageHandler
 {
     public interface IScreenCaptureService
     {
-        Task<bool> CaptureScreenShot(ScreenShotInputDto inputDto, ScreenShotLogInScreenDto loginDto);
+        Task<bool> CaptureScreenShot(ScreenShotInputDto inputDto);
+        Task<bool> SetStartSession(ScreenShotLogInScreenDto loginDto);
+        Task CloseBrowserAndPage();
     }
 }

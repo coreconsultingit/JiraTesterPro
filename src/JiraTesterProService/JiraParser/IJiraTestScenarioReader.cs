@@ -1,4 +1,4 @@
-﻿namespace JiraTesterProService.ExcelHandler;
+﻿namespace JiraTesterProService.JiraParser;
 
 public interface IJiraTestScenarioReader
 {

@@ -2,6 +2,8 @@
 using System.Text.Json;
 using Atlassian.Jira;
 using JiraTesterProData;
+using JiraTesterProService.ImageHandler;
+using JiraTesterProService.JiraParser;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using RestSharp;
@@ -10,14 +12,14 @@ namespace JiraTesterProService;
 
 public class JiraCreateIssueTestStrategyImpl : JiraTestStrategy
 {
-    private IJiraClientProvider jiraClientProvider;
+   
     private ILogger<JiraCreateIssueTestStrategyImpl> logger;
-    private IDictionary<string, Project> dictProject = new Dictionary<string, Project>();
-    private IDictionary<string, IEnumerable<IssueType>> dictIssueType = new Dictionary<string, IEnumerable<IssueType>>();
-    public JiraCreateIssueTestStrategyImpl(IJiraClientProvider jiraClientProvider, ILogger<JiraCreateIssueTestStrategyImpl> logger)
+   
+    public JiraCreateIssueTestStrategyImpl(IJiraClientProvider jiraClientProvider, ILogger<JiraCreateIssueTestStrategyImpl> logger, JiraFileConfigProvider fileConfigProvider, IScreenCaptureService screenCaptureService):base(jiraClientProvider, fileConfigProvider, screenCaptureService,logger)
     {
         this.jiraClientProvider = jiraClientProvider;
         this.logger = logger;
+        
     }
 
     public override async Task<JiraTestResult> Execute(JiraTestMasterDto jiraTestMasterDto)
@@ -33,18 +35,8 @@ public class JiraCreateIssueTestStrategyImpl : JiraTestStrategy
         try
         {
             logger.LogInformation("Started creating jira with the dto {@jiraTestMasterDto}", jiraTestMasterDto);
-            Project projectDetails;
-            if (!dictProject.ContainsKey(jiraTestMasterDto.Project))
-            {
-                projectDetails = await jiraClient.Projects.GetProjectAsync(jiraTestMasterDto.Project);
-                dictProject.Add(jiraTestMasterDto.Project,projectDetails);
-                jiraTestResult.ProjectName = projectDetails.Name.ToString();
-                if (!dictIssueType.ContainsKey(jiraTestMasterDto.Project))
-                {
-                    dictIssueType.Add(jiraTestMasterDto.Project, await dictProject[jiraTestMasterDto.Project].GetIssueTypesAsync());
-                }
-            }
-            var issueType = dictIssueType[jiraTestMasterDto.Project];
+            await InitializeDictionary(jiraTestMasterDto, jiraTestResult);
+             var issueType = dictIssueType[jiraTestMasterDto.Project];
             var type = issueType.Where(x => x.Name.EqualsWithIgnoreCase(jiraTestMasterDto.IssueType)).FirstOrDefault();
             var issueCreated = jiraClient.CreateIssue(jiraTestMasterDto.Project);
             issueCreated.Summary = jiraTestMasterDto.Summary;
@@ -70,10 +62,11 @@ public class JiraCreateIssueTestStrategyImpl : JiraTestStrategy
 
             await AssertSubTaskCount(issueCreated, jiraTestMasterDto);
             AssertExpectedStatus(issueCreated, jiraTestMasterDto, jiraTestResult);
-            SetJiraIssueUrl(issueCreated, jiraTestResult, jiraClient.Url);
+           
             jiraTestResult.TestPassed = true;
             jiraTestResult.JiraIssue = issueCreated;
-            
+            SetJiraIssueUrl(jiraTestResult, jiraClient.Url);
+
         }
         catch (Exception e)
         {
@@ -82,6 +75,7 @@ public class JiraCreateIssueTestStrategyImpl : JiraTestStrategy
             jiraTestResult.TestPassed = jiraTestMasterDto.Expectation == "Failed";
 
         }
+        await TakeScreenShotAfterAction(jiraTestResult);
         return jiraTestResult;
 
 

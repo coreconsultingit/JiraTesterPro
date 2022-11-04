@@ -1,4 +1,5 @@
 ﻿using System.Text.Encodings.Web;
+using JiraTesterProService.JiraParser;
 using JiraTesterProService.OutputTemplate;
 using Microsoft.AspNetCore.Html;
 
@@ -7,23 +8,25 @@ namespace JiraTesterProService;
 public class JiraTestResultWriter : IJiraTestResultWriter
 {
     private IJiraTestOutputGenerator JiraTestOutputGenerator;
-    public JiraTestResultWriter(IJiraTestOutputGenerator jiraTestOutputGenerator)
+    private JiraFileConfigProvider fileConfigProvider;
+    public JiraTestResultWriter(IJiraTestOutputGenerator jiraTestOutputGenerator, JiraFileConfigProvider fileConfigProvider)
     {
         JiraTestOutputGenerator = jiraTestOutputGenerator;
+        this.fileConfigProvider = fileConfigProvider;
     }
 
-    public async Task<bool> WriteTestResult(IList<JiraTestResult> lstJiraTestResult, string filepath)
+    public async Task<bool> WriteTestResult(IList<JiraTestResult> lstJiraTestResult)
     {
         try
         {
-            if (File.Exists(filepath))
+            if (File.Exists(fileConfigProvider.OutputJiraTestFilePathWithMasterFile))
             {
-                File.Delete(filepath);
+                File.Delete(fileConfigProvider.OutputJiraTestFilePathWithMasterFile);
             }
 
             var output = JiraTestOutputGenerator.GetJiraOutPutTemplate(lstJiraTestResult);
 
-            await File.WriteAllTextAsync(filepath, output);
+            await File.WriteAllTextAsync(fileConfigProvider.OutputJiraTestFilePathWithMasterFile, output);
 
             return true;
         }

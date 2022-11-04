@@ -85,15 +85,15 @@ namespace JiraTesterProService.OutputTemplate
 {{/if}}
 <td>{{JiraTestMasterDto.StepId}}</td>
 <td>{{ProjectName}}</td>
-<td>{{JiraTestMasterDto.Scenario}}</td>
 <td>{{JiraTestMasterDto.IssueType}}</td>
+<td>{{JiraTestMasterDto.Scenario}}</td>
 <td>{{JiraTestMasterDto.Action}}</td>
 <td>{{JiraTestMasterDto.Status}}</td>
 <td>{{JiraIssue.Status}}</td>
 <td>{{TestPassed}}</td>
 <td><a href=""{{JiraIssueUrl}}"">{{JiraIssue.Key}}</a></td>
 <td>{{JiraTestMasterDto.Expectation}}</td>
-<th>{{ScreenShot}}</th>
+<th><a href=""{{ScreenShotPath}}"">{{ScreenShotPath}}</a></th>
 <th>{{Exception}}</th>
 <th>{{Comment}}</th>
 </tr>
@@ -124,8 +124,8 @@ namespace JiraTesterProService.OutputTemplate
     <table class=""table""><caption>Execution Details</caption>
 <thead>
 <tr><th>Total Tests</th> <th>{{TotalTest}}</th></tr> 
-<tr class=""table-danger""><th>Passed Tests</th> <th>{{PassedTest}}</th></tr> 
-<tr class=""table-success""><th>Failed Tests</th> <th>{{FailedTest}}</th></tr> 
+<tr class=""table-success""><th>Passed Tests</th> <th>{{PassedTest}}</th></tr> 
+<tr class=""table-danger""><th>Failed Tests</th> <th>{{FailedTest}}</th></tr> 
 </thead>
 <tbody><tr><td></td></tr></tbody></table>
 </div>

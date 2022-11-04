@@ -1,5 +1,5 @@
 ﻿using JiraTesterProService;
-using JiraTesterProService.ExcelHandler;
+using JiraTesterProService.JiraParser;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
@@ -28,7 +28,7 @@ public class JiraTestScenarioReaderTestFixture: JiraTestFixtureBase
 
         var writer = _serviceProvider.GetService<IJiraTestResultWriter>();
 
-        var result = await writer.WriteTestResult(testResult, "JiraTest.html");
+        var result = await writer.WriteTestResult(testResult);
 
         Assert.IsTrue(result);
         

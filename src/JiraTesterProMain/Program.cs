@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using JiraTesterProService.ExcelHandler;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Finance.Implementations;
 using System;
+using JiraTesterProService.JiraParser;
 
 namespace JiraTesterProMain;
 
@@ -46,7 +47,7 @@ class Program
                                     config.GetValue<string>("InputJiraTestFile");
 
             var jirabugMasterFile = opts.InputJiraTestFile ??
-                                    config.GetValue<string>("MasterBugFile");
+                                    config.GetValue<string>("MasterTestFile");
 
             if (inputJiraTestFile == null && jirabugMasterFile == null)
             {
@@ -89,8 +90,7 @@ class Program
 
             var writer = serviceProvider.GetService<IJiraTestResultWriter>();
 
-            await writer.WriteTestResult(testResult,
-                opts.OutputJiraTestFile ?? config.GetValue<string>("OutputJiraTestFile"));
+            await writer.WriteTestResult(testResult);
         }
         catch (Exception e)
         {
