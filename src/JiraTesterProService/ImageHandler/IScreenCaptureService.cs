@@ -8,6 +8,6 @@ namespace JiraTesterProService.ImageHandler
 {
     public interface IScreenCaptureService
     {
-        Task<bool> CaptureScreenShot(string url, string path);
+        Task<bool> CaptureScreenShot(ScreenShotInputDto inputDto);
     }
 }

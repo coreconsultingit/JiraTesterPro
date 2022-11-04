@@ -5,32 +5,34 @@ namespace JiraTesterProService.ImageHandler;
 public class ScreenCaptureService : IScreenCaptureService
 {
 
-    public ScreenCaptureService()
+    private ILogger<ScreenCaptureService> logger;
+    private bool loginsucessfull = false;
+    public ScreenCaptureService(ILogger<ScreenCaptureService> logger)
     {
+        this.logger = logger;
     }
 
-    public async Task<bool> CaptureScreenShot(string url, string path)
+    public async Task<bool> CaptureScreenShot(ScreenShotInputDto inputDto)
     {
         try
         {
-            var screenshot =  ScreenshotUrlAsync(url).Result;
-            await File.WriteAllBytesAsync(path, screenshot);
+            var screenshot =  ScreenshotUrlAsync(inputDto).Result;
+            await File.WriteAllBytesAsync(inputDto.FilePath, screenshot);
             
         }
         catch (Exception e)
         {
-            
+            logger.LogError(e.Message);
             return false;
         }
         return true;
     }
 
-    private async Task<byte[]> ScreenshotUrlAsync(string url)
+    private async Task<byte[]> ScreenshotUrlAsync(ScreenShotInputDto inputDto)
     {
+
         // First download the browser (this will only happen once)
         await DownloadBrowserAsync();
-
-        // Start a new instance of Google Chrome in headless mode
         var browser = await Puppeteer.LaunchAsync(new LaunchOptions()
         {
             Headless = true,
@@ -40,17 +42,41 @@ public class ScreenCaptureService : IScreenCaptureService
                 Height = 1080
             }
         });
-
         // Create a new tab/page in the browser and navigate to the URL
         var page = await browser.NewPageAsync();
-        await page.GoToAsync(url);
+        try
+        {
 
-        // Screenshot the page and return the byte stream
-        var bytes = await page.ScreenshotDataAsync();
+            if (!loginsucessfull  && ! string.IsNullOrEmpty(inputDto.LoginUrl))
+            {
+                await page.GoToAsync(inputDto.LoginUrl);
+                await page.TypeAsync("#login-form-username", inputDto.UserName);
+                await page.TypeAsync("#login-form-password", inputDto.Password);
+                await page.ClickAsync("#login");
+                await page.WaitForNavigationAsync();
 
-        await browser.CloseAsync();
+                loginsucessfull = true;
+            }
 
-        return bytes;
+            await page.GoToAsync(inputDto.TestUrl);
+           
+            // Screenshot the page and return the byte stream
+            var bytes = await page.ScreenshotDataAsync();
+            return bytes;
+        }
+        catch (Exception e)
+        {
+           logger.LogError(e.Message);
+            throw;
+        }
+        finally
+        {
+            await page.CloseAsync();
+            await browser.CloseAsync();
+
+        }
+
+        
     }
 
     private async Task DownloadBrowserAsync()
