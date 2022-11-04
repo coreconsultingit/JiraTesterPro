@@ -28,14 +28,15 @@ namespace JiraTesterProService
             {
                 projectDetails = await jiraClientProvider.GetJiraClient().Projects.GetProjectAsync(jiraTestMasterDto.Project);
                 dictProject.Add(jiraTestMasterDto.Project, projectDetails);
-                jiraTestResult.ProjectName = projectDetails.Name.ToString();
+               
                 if (!dictIssueType.ContainsKey(jiraTestMasterDto.Project))
                 {
                     dictIssueType.Add(jiraTestMasterDto.Project, await dictProject[jiraTestMasterDto.Project].GetIssueTypesAsync());
                 }
             }
+            jiraTestResult.ProjectName = dictProject[jiraTestMasterDto.Project].Name;
         }
-
+       
 
         protected async Task TakeScreenShotAfterAction(JiraTestResult result)
         {
