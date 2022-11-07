@@ -25,7 +25,7 @@ namespace JiraTesterProService.OutputTemplate
             var injectedData = new
             {
                 assemblyversion,
-                TestResults = lstTestResult,
+                TestResults = lstTestResult.ToLookup(x=>x.JiraTestMasterDto.GroupKey),
                 TotalTest = lstTestResult.Count(),
                 PassedTest = lstTestResult.Where(x=>x.TestPassed).Count(),
                 FailedTest = lstTestResult.Where(x=>!x.TestPassed).Count(),
@@ -51,13 +51,15 @@ namespace JiraTesterProService.OutputTemplate
         {
 
 
-            return @"<div  class=""row"">
+            return @"
+
+{{#each TestResults}}
+
+<div  class=""row"">
 <div class=""col-sm border rounded"">
     
 <div class=""table-responsive"">
-
-
-<table class=""table table-hover""><caption>Test Report</caption>
+<table class=""table table-hover""><caption>{{Key}}</caption>
 <thead class=""thead-light"">
 <tr>
 <th>StepId</th>
@@ -77,7 +79,7 @@ namespace JiraTesterProService.OutputTemplate
 </tr> 
 </thead>
 <tbody>
-{{#each TestResults}}
+{{#each @value}}
 {{#if TestPassed}}
 <tr class=""table-success"">
 {{else}}
@@ -90,7 +92,7 @@ namespace JiraTesterProService.OutputTemplate
 <td>{{JiraTestMasterDto.Action}}</td>
 <td>{{JiraTestMasterDto.Status}}</td>
 <td>{{JiraIssue.Status}}</td>
-<td>{{TestPassed}}</td>
+<td>{{TestStatus}}</td>
 <td><a href=""{{JiraIssueUrl}}"">{{JiraIssue.Key}}</a></td>
 <td>{{JiraTestMasterDto.Expectation}}</td>
 <th><a href=""{{ScreenShotPath}}"">{{ScreenShotPath}}</a></th>
@@ -103,7 +105,9 @@ namespace JiraTesterProService.OutputTemplate
 </table>
 </div>
 </div>
-</div>";
+</div>
+{{/each}}
+";
         }
 
 

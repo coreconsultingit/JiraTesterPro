@@ -9,6 +9,19 @@ public class JiraTestResult
     public bool HasException { get; set; }
 
   public bool TestPassed { get; set; }
+
+  public string TestStatus
+  {
+      get
+      {
+          if (TestPassed)
+          {
+              return "Passed";
+          }
+
+          return "Failed";
+      }
+  }
   
   public string Comment { get; set; }
   public string ExceptionMessage { get; set; }

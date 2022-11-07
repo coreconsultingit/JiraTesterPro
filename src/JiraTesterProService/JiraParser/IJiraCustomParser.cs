@@ -6,5 +6,5 @@ public interface IJiraCustomParser
 {
     Task<JiraRootobject> GetParsedJiraRootBasedOnProject(string project);
 
-    JiraMetaDataDto GetJiraMetaData();
+    Task<JiraMetaDataDto> GetJiraMetaData();
 }

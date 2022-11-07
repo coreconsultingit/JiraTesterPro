@@ -60,12 +60,14 @@ public class JiraCustomParser : IJiraCustomParser
 
     }
 
-    public JiraMetaDataDto GetJiraMetaData()
+    public async Task<JiraMetaDataDto> GetJiraMetaData()
     {
         var jiraClient = jiraClientProvider.GetJiraClient();
+        var serverInfo = await jiraClient.ServerInfo.GetServerInfoAsync(false);
         var jiraMeta = new JiraMetaDataDto()
         {
-            JiraVersion = jiraClient.ServerInfo.ToString(),
+            JiraVersion = serverInfo.Version
+                .ToString(),
             JiraUrl = jiraClient.RestClient.Url,
             JiraAccount = jiraClientProvider.GetUserName,
 
