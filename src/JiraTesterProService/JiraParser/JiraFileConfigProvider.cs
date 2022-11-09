@@ -6,29 +6,46 @@ using System.Threading.Tasks;
 
 namespace JiraTesterProService.JiraParser
 {
-    public class JiraFileConfigProvider
+
+    public interface IJiraFileConfigProvider
     {
-        public string OutputJiraTestFilePath { get; private set; }
+        string OutputJiraTestFilePathWithMasterFile { get; }
+        string OutputJiraTestFilePathWithMaster { get; }
 
-        public string MasterTestFile { get; private set; }
+        void InitializeConfig(FileConfigDto fileConfigDto);
 
-        public string InputJiraTestFile { get; private set; }
-
+    }
+    public class JiraFileConfigProvider: IJiraFileConfigProvider
+    {
+        
         private ILogger<JiraFileConfigProvider> logger;
-        public JiraFileConfigProvider(string outputJiraTestFilePath, string masterTestFile, string inputJiraTestFile, ILogger<JiraFileConfigProvider> logger)
+
+        private IMemoryCache memoryCache;
+        public JiraFileConfigProvider( ILogger<JiraFileConfigProvider> logger, IMemoryCache memoryCache)
         {
-            OutputJiraTestFilePath = outputJiraTestFilePath;
-            MasterTestFile = masterTestFile;
-            InputJiraTestFile = inputJiraTestFile;
+            
             this.logger = logger;
+            this.memoryCache = memoryCache;
+        }
+
+        public void InitializeConfig(FileConfigDto fileConfigDto)
+        {
+            memoryCache.Set(CacheConst.FileConfig, fileConfigDto);
         }
 
         public string OutputJiraTestFilePathWithMaster
         {
             get
             {
-                var masterfile = new FileInfo(MasterTestFile);
-                var dir = new DirectoryInfo(OutputJiraTestFilePath);
+
+                memoryCache.TryGetValue(CacheConst.FileConfig, out FileConfigDto fileConfigDto);
+                if (fileConfigDto == null)
+                {
+                    logger.LogError("File Config not initialized");
+                    throw new Exception("File Config not initialized");
+                }
+                var masterfile = new FileInfo(fileConfigDto.MasterTestFile);
+                var dir = new DirectoryInfo(fileConfigDto.OutputJiraTestFilePath);
                 var fullpath = System.IO.Path.Combine(dir.FullName, Path.GetFileNameWithoutExtension(masterfile.Name));
                 try
                 {
@@ -47,7 +64,6 @@ namespace JiraTesterProService.JiraParser
 
                 return fullpath;
 
-
             }
         }
         public string OutputJiraTestFilePathWithMasterFile
@@ -55,8 +71,13 @@ namespace JiraTesterProService.JiraParser
             get
             {
                 var masterfile = new FileInfo(OutputJiraTestFilePathWithMaster);
-
-                var dir = new DirectoryInfo(OutputJiraTestFilePath);
+                memoryCache.TryGetValue(CacheConst.FileConfig, out FileConfigDto fileConfigDto);
+                if (fileConfigDto == null)
+                {
+                    logger.LogError("File Config not initialized");
+                    throw new Exception("File Config not initialized");
+                }
+                var dir = new DirectoryInfo(fileConfigDto.OutputJiraTestFilePath);
                 return System.IO.Path.Combine(dir.FullName, Path.GetFileNameWithoutExtension(masterfile.Name), DateTime.Now.ToString("yyyyMMdd"), $"TestOutPut.html");
 
 

@@ -9,5 +9,8 @@ namespace JiraTesterProData.Constants
     public  class CacheConst
     {
         public const string UserLogin = "UserLogin";
+        public const string FileConfig = "FileConfig";
+
+
     }
 }

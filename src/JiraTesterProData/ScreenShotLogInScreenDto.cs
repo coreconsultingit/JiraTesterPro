@@ -14,3 +14,12 @@ public class JiraLogInDto
    
 
 }
+
+public class FileConfigDto
+{
+    public string OutputJiraTestFilePath { get;  set; }
+
+    public string MasterTestFile { get;  set; }
+
+    public string InputJiraTestFile { get;  set; }
+}

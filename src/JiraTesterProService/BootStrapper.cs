@@ -61,8 +61,9 @@ namespace JiraTesterProService
             services.AddScoped<IPropertyBinder, PropertyBinder>();
             services.AddScoped(typeof(IDataTableParser<>), typeof(DataTableParser<>));
             services.AddSingleton<IUserCredentialProvider, UserCredentialProvider>();
+            services.AddSingleton<IJiraFileConfigProvider, JiraFileConfigProvider>();
             RegisterJiraClientProvider(services);
-            RegisterJiraFileConfigProvider(services, configuration, options);
+           
             ServiceProvider = services.BuildServiceProvider();
 
             if (options.IsWeb==null || !options.IsWeb.Value)
@@ -80,6 +81,17 @@ namespace JiraTesterProService
 
                 var usercredentialprovider = ServiceProvider.GetService<IUserCredentialProvider>();
                 usercredentialprovider.AddJiraCredential(logindto);
+
+
+                var inputJiraTestFile = configuration.GetValue<string>("InputJiraTestFile");
+                var outPutJiraTestFilePath = configuration.GetValue<string>("OutputJiraTestFilePath");
+                var masterTestFile = configuration.GetValue<string>("MasterTestFile");
+                var fileConfig = new FileConfigDto()
+                {
+                    OutputJiraTestFilePath = options.OutputJiraTestFilePath ?? outPutJiraTestFilePath,
+                    MasterTestFile = options.MasterTestFile ?? masterTestFile,
+                    InputJiraTestFile = options.InputJiraTestFile ?? inputJiraTestFile
+                };
             }
         }
 
@@ -89,16 +101,6 @@ namespace JiraTesterProService
             services.AddScoped<IJiraClientProvider, JiraClientProvider>();
         }
 
-        private static void RegisterJiraFileConfigProvider(IServiceCollection services, IConfiguration configuration,
-            JiraTesterCommandLineOptions options)
-        {
-            var inputJiraTestFile = configuration.GetValue<string>("InputJiraTestFile");
-            var outPutJiraTestFilePath = configuration.GetValue<string>("OutputJiraTestFilePath");
-            var masterTestFile = configuration.GetValue<string>("MasterTestFile");
-
-
-            services.AddScoped<JiraFileConfigProvider>(x => new JiraFileConfigProvider(options.OutputJiraTestFilePath ?? outPutJiraTestFilePath,
-                options.MasterTestFile ?? masterTestFile, options.InputJiraTestFile ?? inputJiraTestFile,ServiceProvider.GetService<ILogger<JiraFileConfigProvider>>()));
-        }
+       
     }
 }
