@@ -20,6 +20,7 @@ using MudBlazor.Services;
 using Serilog;
 using JiraTesterProData;
 using JiraTesterProService;
+using JiraTesterProService.ImageHandler;
 
 namespace JiraTestProUI
 {
@@ -28,6 +29,8 @@ namespace JiraTestProUI
     /// </summary>
     public partial class MainWindow : Window
     {
+        private IScreenCaptureService screenCaptureService;
+        private ServiceProvider provider;
         public MainWindow()
         {
             InitializeComponent();
@@ -54,10 +57,11 @@ namespace JiraTestProUI
 #if DEBUG
                 serviceCollection.AddBlazorWebViewDeveloperTools();
 #endif
-               serviceCollection.RegisterDependency(new JiraTesterCommandLineOptions());
+               serviceCollection.RegisterDependency(new JiraTesterCommandLineOptions(){IsWeb = true});
                 serviceCollection.AddMudServices();
 
-                var provider = serviceCollection.BuildServiceProvider();
+               
+                provider = serviceCollection.BuildServiceProvider();
                 Resources.Add("services", provider);
                 //var scripter = provider.GetService<TableScriptCreator>();
                 //var filePath = @"C:\Users\s.kumar\Downloads\jama8741schema\schemaspy_output\jama.xml";
@@ -73,6 +77,12 @@ namespace JiraTestProUI
                 string text = $"Error opening the Clario Reporter app {exception.Message} {exception.InnerException}";
                 File.WriteAllText(logFilePath, text);
             }
+        }
+
+        protected void Window_Closed(object sender, EventArgs e)
+        {
+            screenCaptureService = provider.GetService<IScreenCaptureService>();
+            screenCaptureService.CloseBrowserAndPage();
         }
     }
 }

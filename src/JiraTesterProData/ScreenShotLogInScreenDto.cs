@@ -2,7 +2,7 @@
 
 namespace JiraTesterProData;
 
-public class ScreenShotLogInScreenDto
+public class JiraLogInDto
 {
     [Required]
     

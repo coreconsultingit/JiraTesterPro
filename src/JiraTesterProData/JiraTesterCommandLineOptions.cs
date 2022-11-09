@@ -23,9 +23,12 @@ namespace JiraTesterProData
         [Option('p', "password", Required = false, HelpText = "Your password")]
         public string? Password { get; set; }
 
+        [Option('w', "isweb", Required = false, HelpText = "Is Web")]
+        public bool? IsWeb { get; set; }
+
         public override string ToString()
         {
-            return $"Running with username {Username} password {Password} JiraUrl {JiraUrl}  Jira input file {InputJiraTestFile}";
+            return $"Running with username {Username} password {Password} JiraUrl {JiraUrl}  Jira input file {InputJiraTestFile}  IsWeb  {IsWeb}";
         }
     }
 }

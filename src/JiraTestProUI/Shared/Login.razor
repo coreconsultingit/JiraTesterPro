@@ -1,0 +1,75 @@
+﻿@using MudBlazor
+@using System.ComponentModel.DataAnnotations
+@using Color = MudBlazor.Color
+@using InputType = MudBlazor.InputType
+@using System.Text.RegularExpressions
+@using JiraTesterProData
+@using JiraTesterProService
+@using JiraTesterProService.ImageHandler
+
+<MudCard>
+
+    <MudCardContent>
+        <MudText Typo="Typo.h5">Welcome to Jira Test Automation Pro</MudText>
+        <MudText Typo="Typo.body2">
+            Please enter your Jira Credentials
+        </MudText>
+
+        <MudPaper Class="pa-4">
+            <EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+                <DataAnnotationsValidator />
+
+                <MudTextField Label="First name" HelperText="Jira User Name" @bind-Value="model.UserName" For="@(() => model.UserName)" />
+
+                <MudTextField Label="Password" HelperText="Choose a strong password" @bind-Value="model.Password" For="@(() => model.Password)" InputType="InputType.Password" />
+
+                <div class="d-flex">
+                    <MudRadioGroup RequiredError="Environment is required" @bind-SelectedOption="model.LoginUrl" For="@(() => model.LoginUrl)">
+                        <MudRadio Option="@("https://jiradev.ert.com/jira")">Dev</MudRadio>
+                        <MudRadio Option="@("https://jira.ert.com/jira")">Prod</MudRadio>
+                    </MudRadioGroup>
+                </div>
+
+
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="demo-form-button">Login</MudButton>
+
+            </EditForm>
+        </MudPaper>
+
+
+
+
+    </MudCardContent>
+    <MudCardActions>
+
+        @* <MudButton Variant="Variant.Text" Color="MudBlazor.Color.Primary" Link="Reconciliation">Try Reconciliation</MudButton>*@
+    </MudCardActions>
+</MudCard>
+
+@code {
+    JiraLogInDto model = new JiraLogInDto();
+    bool success;
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; }
+    protected bool Isloading { get; set; } = false;
+    [Inject]
+    protected IScreenCaptureService ScreenCaptureService { get; set; }
+    [Inject]
+    protected IUserCredentialProvider UserCredentialProvider { get; set; }
+    protected async Task OnValidSubmit(EditContext context)
+    {
+        var model = (JiraLogInDto)context.Model;
+
+        Isloading = true;
+        UserCredentialProvider.AddJiraCredential(model);
+        success = await ScreenCaptureService.SetStartSession();
+
+        if (success)
+        {
+           
+            Isloading = false;
+            MudDialog.Close();
+        }
+    }
+
+}

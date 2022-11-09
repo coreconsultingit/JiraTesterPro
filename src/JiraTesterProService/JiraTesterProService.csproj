@@ -14,7 +14,9 @@
     <PackageReference Include="EPPlus" Version="6.0.8" />
     <PackageReference Include="Handlebars.Net" Version="2.1.2" />
     <PackageReference Include="Handlebars.Net.Helpers" Version="2.3.6" />
+    <PackageReference Include="Microsoft.AspNetCore.Components" Version="6.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.Html.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="6.0.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />

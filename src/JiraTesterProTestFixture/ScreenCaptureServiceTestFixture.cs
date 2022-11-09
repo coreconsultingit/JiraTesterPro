@@ -18,7 +18,7 @@ namespace JiraTesterProTestFixture
         {
             var screencaptureService = _serviceProvider.GetService<IScreenCaptureService>();
 
-            await screencaptureService.SetStartSession(null);
+            await screencaptureService.SetStartSession();
             var result = await screencaptureService.CaptureScreenShot(new ScreenShotInputDto()
             {
                 TestUrl = "https://google.com", FilePath = "C:\\temp\\testscreenshot.png"

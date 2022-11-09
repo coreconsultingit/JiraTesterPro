@@ -13,6 +13,7 @@ namespace JiraTesterProService.JiraParser
         public string MasterTestFile { get; private set; }
 
         public string InputJiraTestFile { get; private set; }
+
         private ILogger<JiraFileConfigProvider> logger;
         public JiraFileConfigProvider(string outputJiraTestFilePath, string masterTestFile, string inputJiraTestFile, ILogger<JiraFileConfigProvider> logger)
         {

@@ -13,3 +13,6 @@ global using System.Data;
 global using JiraTesterProData.Extensions;
 global using Microsoft.Extensions.Logging;
 global using OfficeOpenXml;
+global using JiraTesterProData.Constants;
+global using Microsoft.AspNetCore.Components;
+global using Microsoft.Extensions.Caching.Memory;

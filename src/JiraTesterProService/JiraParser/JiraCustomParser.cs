@@ -10,11 +10,12 @@ public class JiraCustomParser : IJiraCustomParser
 {
     private IJiraClientProvider jiraClientProvider;
     private ILogger<JiraCustomParser> logger;
-
-    public JiraCustomParser(IJiraClientProvider jiraClientProvider, ILogger<JiraCustomParser> logger)
+    private IUserCredentialProvider userCredentialProvider;
+    public JiraCustomParser(IJiraClientProvider jiraClientProvider, ILogger<JiraCustomParser> logger, IUserCredentialProvider userCredentialProvider)
     {
         this.jiraClientProvider = jiraClientProvider;
         this.logger = logger;
+        this.userCredentialProvider = userCredentialProvider;
     }
     //Gettingtransitions
     //https://jiradev.ert.com/jira/rest/api/2/issue/ED-4810/transitions?expand=transitions.fields
@@ -69,7 +70,7 @@ public class JiraCustomParser : IJiraCustomParser
             JiraVersion = serverInfo.Version
                 .ToString(),
             JiraUrl = jiraClient.RestClient.Url,
-            JiraAccount = jiraClientProvider.GetUserName,
+            JiraAccount = userCredentialProvider.GetJiraCredential().UserName,
 
         };
         return jiraMeta;

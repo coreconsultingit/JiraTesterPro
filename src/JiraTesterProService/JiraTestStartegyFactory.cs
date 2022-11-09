@@ -8,11 +8,13 @@ public class JiraTestStartegyFactory : IJiraTestStartegyFactory
     private IServiceProvider serviceProvider;
     private IScreenCaptureService screenCaptureService;
     private IJiraClientProvider jiraClientProvider;
+   
     public JiraTestStartegyFactory(IServiceProvider serviceProvider, IScreenCaptureService screenCaptureService, IJiraClientProvider jiraClientProvider)
     {
         this.serviceProvider = serviceProvider;
         this.screenCaptureService = screenCaptureService;
         this.jiraClientProvider = jiraClientProvider;
+        
     }
 
     public  async Task<JiraTestResult> GetJiraTestStrategyResult(JiraTestMasterDto jiraTestMasterDto)
@@ -44,13 +46,7 @@ public class JiraTestStartegyFactory : IJiraTestStartegyFactory
     public async Task<IList<JiraTestResult>> GetJiraTestStrategyResult(IList<JiraTestMasterDto> jiraTestMasterDto)
     {
 
-        await screenCaptureService.SetStartSession(new ScreenShotLogInScreenDto()
-        {
-            LoginUrl = jiraClientProvider.GetJiraClient().Url,
-            UserName = jiraClientProvider.GetUserName,
-            Password = jiraClientProvider.GetPassword
-
-        });
+        await screenCaptureService.SetStartSession();
         var orderedTests = jiraTestMasterDto.OrderBy(x => x.GroupKey).ThenBy(x => x.OrderId).ThenBy(x=>x.IssueType);
 
         var lstTaskResults = new List<JiraTestResult>();

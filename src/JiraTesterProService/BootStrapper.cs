@@ -32,6 +32,7 @@ namespace JiraTesterProService
             services.AddScoped(provider => configuration);
             services.AddScoped<ILoggerFactory, LoggerFactory>();
             services.AddScoped(typeof(ILogger<>), typeof(Logger<>));
+            services.AddMemoryCache();
 
             services.AddScoped<JiraCreateIssueTestStrategyImpl>();
             services.AddScoped<JiraUpdateIssueTestStrategyImpl>();
@@ -59,20 +60,33 @@ namespace JiraTesterProService
                 .AddScoped<IFileService, ExcelFileService>(s => s.GetService<ExcelFileService>());
             services.AddScoped<IPropertyBinder, PropertyBinder>();
             services.AddScoped(typeof(IDataTableParser<>), typeof(DataTableParser<>));
-
-            RegisterJiraClientProvider(services, configuration, options);
+            services.AddSingleton<IUserCredentialProvider, UserCredentialProvider>();
+            RegisterJiraClientProvider(services);
             RegisterJiraFileConfigProvider(services, configuration, options);
             ServiceProvider = services.BuildServiceProvider();
+
+            if (options.IsWeb==null || !options.IsWeb.Value)
+            {
+                var username = configuration.GetValue<string>("JiraConfig:userName");
+                var passwordtoken = configuration.GetValue<string>("JiraConfig:password");
+                var jiraurl = configuration.GetValue<string>("JiraConfig:jiraUrl");
+
+                var logindto = new JiraLogInDto()
+                {
+                    UserName = options.Username ?? username,
+                    Password = options.Password ?? passwordtoken,
+                    LoginUrl = options.JiraUrl ?? jiraurl
+                };
+
+                var usercredentialprovider = ServiceProvider.GetService<IUserCredentialProvider>();
+                usercredentialprovider.AddJiraCredential(logindto);
+            }
         }
 
-        private static void RegisterJiraClientProvider(IServiceCollection services, IConfiguration configuration, JiraTesterCommandLineOptions options)
+        private static void RegisterJiraClientProvider(IServiceCollection services)
         {
-            var username = configuration.GetValue<string>("JiraConfig:userName");
-            var passwordtoken = configuration.GetValue<string>("JiraConfig:password");
-            var jiraurl = configuration.GetValue<string>("JiraConfig:jiraUrl");
-
-
-            services.AddScoped<IJiraClientProvider, JiraClientProvider>(x=> new JiraClientProvider(options.Username??username, options.Password??passwordtoken,options.JiraUrl??jiraurl));
+            
+            services.AddScoped<IJiraClientProvider, JiraClientProvider>();
         }
 
         private static void RegisterJiraFileConfigProvider(IServiceCollection services, IConfiguration configuration,

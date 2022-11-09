@@ -4,19 +4,19 @@ namespace JiraTesterProService;
 
 public class JiraClientProvider : IJiraClientProvider
 {
-    private string username;
-    private string passwordtoken;
-    private string jiraurl;
+   
 
-    public JiraClientProvider(string username, string passwordtoken, string jiraurl)
+    private IUserCredentialProvider userCredentialProvider;
+    public JiraClientProvider(IUserCredentialProvider userCredentialProvider)
     {
-        this.username = username;
-        this.passwordtoken = passwordtoken;
-        this.jiraurl = jiraurl;
+        
+        this.userCredentialProvider = userCredentialProvider;
     }
 
     public Jira GetJiraClient(JiraRestClientSettings? settings)
     {
+        var credential = userCredentialProvider.GetJiraCredential();
+       
         if (settings == null)
         {
             settings = new JiraRestClientSettings()
@@ -29,10 +29,9 @@ public class JiraClientProvider : IJiraClientProvider
         settings.CustomFieldSerializers["com.atlassian.jira.plugin.system.customfieldtypes:multiuserpicker"]
             = new MultiObjectCustomFieldValueSerializer("displayName");
         return Jira.CreateRestClient(
-            
-            jiraurl, username, passwordtoken, settings);
+
+            credential.LoginUrl, credential.UserName, credential.Password, settings);
     }
 
-    public string GetUserName => username;
-    public string GetPassword => passwordtoken;
+   
 }

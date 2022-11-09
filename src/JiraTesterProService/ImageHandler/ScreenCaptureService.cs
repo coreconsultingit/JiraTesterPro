@@ -5,38 +5,41 @@ namespace JiraTesterProService.ImageHandler;
 
 public class ScreenCaptureService : IScreenCaptureService
 {
+    private IUserCredentialProvider userCredentialProvider;
 
     private ILogger<ScreenCaptureService> logger;
     private bool loginsucessfull = false;
     private IBrowser browser;
     private IPage page;
-    public ScreenCaptureService(ILogger<ScreenCaptureService> logger)
+    public ScreenCaptureService(ILogger<ScreenCaptureService> logger, IUserCredentialProvider userCredentialProvider)
     {
         this.logger = logger;
+        this.userCredentialProvider = userCredentialProvider;
     }
-
-    public async Task<bool> SetStartSession(ScreenShotLogInScreenDto screenShotLogInScreenDto)
+    
+    public async Task<bool> SetStartSession()
     {
         await DownloadBrowserAsync();
 
         browser = await Puppeteer.LaunchAsync(new LaunchOptions()
         {
-            Headless = false,
+            Headless = true,
             DefaultViewport = new ViewPortOptions()
             {
                 Width = 1920,
                 Height = 1080
             }
         });
-    
+
+        var userCredential = userCredentialProvider.GetJiraCredential();
         page = await browser.NewPageAsync();
-        if (!loginsucessfull && screenShotLogInScreenDto != null)
+        if (!loginsucessfull && userCredential != null)
         {
             try
             {
-                await page.GoToAsync(screenShotLogInScreenDto.LoginUrl);
-                await page.TypeAsync("#login-form-username", screenShotLogInScreenDto.UserName);
-                await page.TypeAsync("#login-form-password", screenShotLogInScreenDto.Password);
+                await page.GoToAsync(userCredential.LoginUrl);
+                await page.TypeAsync("#login-form-username", userCredential.UserName);
+                await page.TypeAsync("#login-form-password", userCredential.Password);
                 await page.ClickAsync("#login");
                 await page.WaitForNavigationAsync();
             }
@@ -108,8 +111,17 @@ public class ScreenCaptureService : IScreenCaptureService
 
     public async Task CloseBrowserAndPage()
     {
-        await page.CloseAsync();
-        await browser.CloseAsync();
+        if (page != null)
+        {
+            await page.CloseAsync();
+        }
+
+        if (browser != null)
+        {
+            await browser.CloseAsync();
+        }
+       
+        
     }
 
     private async Task DownloadBrowserAsync()
