@@ -1,29 +1,50 @@
 ﻿@page "/"
 @using MudBlazor
+@using System.ComponentModel.DataAnnotations
+@using Color = MudBlazor.Color
+@using InputType = MudBlazor.InputType
+@using System.Text.RegularExpressions
+@using JiraTesterProData
+@using JiraTesterProService.ImageHandler
 
 <MudCard>
    
     <MudCardContent>
         <MudText Typo="Typo.h5">Welcome to Jira Test Automation Pro</MudText>
         <MudText Typo="Typo.body2">
-            ToDO
+            Please enter your Jira Credentials
         </MudText>
-       
-        
-         <MudList>
-        <MudListSubheader>
-                <MudText Typo="Typo.h6">
-                    Supported Data Sources:
-                </MudText>
-                
-        </MudListSubheader>
-            <MudListItem Icon="@Icons.Material.Filled.StarRate">
-                Excel imput
-        </MudListItem>
-        
-            
 
-        </MudList>
+        <MudPaper Class="pa-4">
+            <EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+                <DataAnnotationsValidator />
+                
+                        <MudTextField Label="First name" HelperText="Jira User Name" @bind-Value="model.UserName" For="@(() => model.UserName)" />
+                       
+                        <MudTextField Label="Password" HelperText="Choose a strong password" @bind-Value="model.Password" For="@(() => model.Password)" InputType="InputType.Password" />
+                       
+                        <div class="d-flex">
+                            <MudRadioGroup RequiredError="Environment is required" @bind-SelectedOption="model.LoginUrl" For="@(() => model.LoginUrl)">
+                                <MudRadio Option="@("https://jiradev.ert.com/jira")">Dev</MudRadio>
+                                <MudRadio Option="@("https://jira.ert.com/jira")">Prod</MudRadio>
+                            </MudRadioGroup>
+                        </div>
+
+               
+                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="demo-form-button">Login</MudButton>
+                 
+             
+
+               
+                        @if (!success)
+                        {
+                            <MudText Color="Color.Error">Failed to login</MudText>
+                        }
+
+            </EditForm>
+        </MudPaper>
+        
+       
         
         
     </MudCardContent>
@@ -33,9 +54,23 @@
     </MudCardActions>
 </MudCard>
 
-@code{
-protected override void OnInitialized()
+@code {
+    ScreenShotLogInScreenDto model = new ScreenShotLogInScreenDto();
+    bool success;
+
+   
+    [Inject]
+    protected IScreenCaptureService ScreenCaptureService { get; set; }
+    protected async Task OnValidSubmit(EditContext context)
+    {
+        var model = (ScreenShotLogInScreenDto)context.Model;
+        success = await ScreenCaptureService.SetStartSession(new ScreenShotLogInScreenDto()
         {
-            //AppState.IndexComponent = this;
-        }
+            LoginUrl = model.LoginUrl,
+            UserName = model.UserName,
+            Password = model.Password
+        });
+        StateHasChanged();
+    }
+
 }

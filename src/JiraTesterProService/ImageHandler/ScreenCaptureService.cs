@@ -21,7 +21,7 @@ public class ScreenCaptureService : IScreenCaptureService
 
         browser = await Puppeteer.LaunchAsync(new LaunchOptions()
         {
-            Headless = true,
+            Headless = false,
             DefaultViewport = new ViewPortOptions()
             {
                 Width = 1920,
@@ -32,11 +32,20 @@ public class ScreenCaptureService : IScreenCaptureService
         page = await browser.NewPageAsync();
         if (!loginsucessfull && screenShotLogInScreenDto != null)
         {
-            await page.GoToAsync(screenShotLogInScreenDto.LoginUrl);
-            await page.TypeAsync("#login-form-username", screenShotLogInScreenDto.UserName);
-            await page.TypeAsync("#login-form-password", screenShotLogInScreenDto.Password);
-            await page.ClickAsync("#login");
-            await page.WaitForNavigationAsync();
+            try
+            {
+                await page.GoToAsync(screenShotLogInScreenDto.LoginUrl);
+                await page.TypeAsync("#login-form-username", screenShotLogInScreenDto.UserName);
+                await page.TypeAsync("#login-form-password", screenShotLogInScreenDto.Password);
+                await page.ClickAsync("#login");
+                await page.WaitForNavigationAsync();
+            }
+            catch (Exception e)
+            {
+               logger.LogError(e.Message);
+               return false;
+            }
+          
 
             loginsucessfull = true;
         }

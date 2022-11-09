@@ -18,6 +18,8 @@ using System.Windows.Shapes;
 using JiraTesterProService.FileHandler;
 using MudBlazor.Services;
 using Serilog;
+using JiraTesterProData;
+using JiraTesterProService;
 
 namespace JiraTestProUI
 {
@@ -47,12 +49,12 @@ namespace JiraTestProUI
 
                 Log.Information("Starting the app");
                 var serviceCollection = new ServiceCollection();
-
+                
                 serviceCollection.AddWpfBlazorWebView();
 #if DEBUG
                 serviceCollection.AddBlazorWebViewDeveloperTools();
 #endif
-               // serviceCollection.RegisterDependency();
+               serviceCollection.RegisterDependency(new JiraTesterCommandLineOptions());
                 serviceCollection.AddMudServices();
 
                 var provider = serviceCollection.BuildServiceProvider();
