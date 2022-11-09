@@ -10,7 +10,7 @@ public class JiraUpdateIssueTestStrategyImpl: JiraTestStrategy
 {
     private IJiraClientProvider jiraClientProvider;
     private ILogger<JiraCreateIssueTestStrategyImpl> logger;
-    public JiraUpdateIssueTestStrategyImpl(IJiraClientProvider jiraClientProvider, ILogger<JiraCreateIssueTestStrategyImpl> logger, JiraFileConfigProvider fileConfigProvider, IScreenCaptureService screenCaptureService) : base(jiraClientProvider, fileConfigProvider, screenCaptureService, logger)
+    public JiraUpdateIssueTestStrategyImpl(IJiraClientProvider jiraClientProvider, ILogger<JiraCreateIssueTestStrategyImpl> logger, IJiraFileConfigProvider fileConfigProvider, IScreenCaptureService screenCaptureService) : base(jiraClientProvider, fileConfigProvider, screenCaptureService, logger)
     {
         this.jiraClientProvider = jiraClientProvider;
         this.logger = logger;

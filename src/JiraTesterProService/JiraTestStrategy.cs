@@ -11,9 +11,9 @@ namespace JiraTesterProService
         protected IDictionary<string, IEnumerable<IssueType>> dictIssueType = new Dictionary<string, IEnumerable<IssueType>>();
         protected  IJiraClientProvider jiraClientProvider;
         protected IScreenCaptureService screenCaptureService;
-        protected JiraFileConfigProvider jiraFileConfigProvider;
+        protected IJiraFileConfigProvider jiraFileConfigProvider;
         protected JiraTestStrategy(IJiraClientProvider jiraClientProvider,
-            JiraFileConfigProvider jiraFileConfigProvider, IScreenCaptureService screenCaptureService,
+            IJiraFileConfigProvider jiraFileConfigProvider, IScreenCaptureService screenCaptureService,
             ILogger<JiraCreateIssueTestStrategyImpl> logger)
         {
             this.jiraClientProvider = jiraClientProvider;

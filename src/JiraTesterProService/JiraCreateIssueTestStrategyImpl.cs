@@ -15,7 +15,7 @@ public class JiraCreateIssueTestStrategyImpl : JiraTestStrategy
    
     private ILogger<JiraCreateIssueTestStrategyImpl> logger;
    
-    public JiraCreateIssueTestStrategyImpl(IJiraClientProvider jiraClientProvider, ILogger<JiraCreateIssueTestStrategyImpl> logger, JiraFileConfigProvider fileConfigProvider, IScreenCaptureService screenCaptureService):base(jiraClientProvider, fileConfigProvider, screenCaptureService,logger)
+    public JiraCreateIssueTestStrategyImpl(IJiraClientProvider jiraClientProvider, ILogger<JiraCreateIssueTestStrategyImpl> logger, IJiraFileConfigProvider fileConfigProvider, IScreenCaptureService screenCaptureService):base(jiraClientProvider, fileConfigProvider, screenCaptureService,logger)
     {
         this.jiraClientProvider = jiraClientProvider;
         this.logger = logger;

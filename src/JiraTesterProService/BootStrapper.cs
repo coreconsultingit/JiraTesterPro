@@ -92,6 +92,8 @@ namespace JiraTesterProService
                     MasterTestFile = options.MasterTestFile ?? masterTestFile,
                     InputJiraTestFile = options.InputJiraTestFile ?? inputJiraTestFile
                 };
+                var jiraFileConfig = ServiceProvider.GetService<IJiraFileConfigProvider>();
+                jiraFileConfig.InitializeConfig(fileConfig);
             }
         }
 
