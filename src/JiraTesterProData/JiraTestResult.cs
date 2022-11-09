@@ -31,6 +31,11 @@ public class JiraTestResult
 
   public string JiraIssueUrl { get; set; }
   public string ScreenShotPath { get; set; }
+
+  public string ScreenShotFileName
+  {
+      get { return new FileInfo(ScreenShotPath).Name; }
+  }
 }
 public class ReconConfig
 {

@@ -17,10 +17,10 @@ namespace JiraTesterProService.OutputTemplate
             this.jiraCustomParser = jiraCustomParser;
         }
 
-        public string GetJiraOutPutTemplate(IList<JiraTestResult> lstTestResult)
+        public async Task<string> GetJiraOutPutTemplate(IList<JiraTestResult> lstTestResult)
         {
             string head = HeadHtml();
-
+            var metaData = await jiraCustomParser.GetJiraMetaData();
             var assemblyversion = Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "1.0.0";
             var injectedData = new
             {
@@ -29,9 +29,9 @@ namespace JiraTesterProService.OutputTemplate
                 TotalTest = lstTestResult.Count(),
                 PassedTest = lstTestResult.Where(x=>x.TestPassed).Count(),
                 FailedTest = lstTestResult.Where(x=>!x.TestPassed).Count(),
-                JiraMetaData = jiraCustomParser.GetJiraMetaData()
+                JiraMetaData = metaData
 
-        };
+            };
            
             var template = Handlebars.Compile($"<!DOCTYPE html><html languate=\"en\">{head}<div class=\"container-fluid\"><body> " +
                                               $"{GetHeaderSections()}{GetTestReportSection()} </div></body></html>");
@@ -66,6 +66,7 @@ namespace JiraTesterProService.OutputTemplate
 <th>Project</th>
 <th>IssueType</th>
 <th>ExecutedScenario</th>
+<th>Create/Update</th>
 <th>Action</th>
 <th>Expected Result</th>
 <th>Actual Result</th>
@@ -91,11 +92,12 @@ namespace JiraTesterProService.OutputTemplate
 <td>{{JiraTestMasterDto.Scenario}}</td>
 <td>{{JiraTestMasterDto.Action}}</td>
 <td>{{JiraTestMasterDto.Status}}</td>
+<td>{{JiraTestMasterDto.ExpectedStatus}}</td>
 <td>{{JiraIssue.Status}}</td>
 <td>{{TestStatus}}</td>
 <td><a href=""{{JiraIssueUrl}}"">{{JiraIssue.Key}}</a></td>
 <td>{{JiraTestMasterDto.Expectation}}</td>
-<th><a href=""{{ScreenShotPath}}"">{{ScreenShotPath}}</a></th>
+<th><a href=""{{ScreenShotPath}}"">{{ScreenShotFileName}}</a></th>
 <th>{{Exception}}</th>
 <th>{{Comment}}</th>
 </tr>

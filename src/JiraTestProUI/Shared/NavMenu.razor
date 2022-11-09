@@ -1,0 +1,31 @@
+﻿@using MudBlazor
+@inherits NavMenuBase
+<MudNavMenu Style="color:white">
+    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
+   
+
+    <MudNavGroup Title="Dashboard" Typo="Typo.subtitle2" Color="Color.Inherit" style="FONT-WEIGHT: BOLDER;" Expanded="true">
+
+        @if (DashBoardList != null)
+
+        {
+
+            @foreach (var source in DashBoardList)
+
+            {
+                var url = $"{source}DashBoard/{source}";
+                <MudNavLink Href="@url" Icon="@Icons.Material.Filled.Add">@source</MudNavLink>
+
+            }
+
+
+
+        }
+
+    </MudNavGroup>
+
+
+
+   @* <MudNavLink Href="fetchdata" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.List">Fetch data</MudNavLink>*@
+</MudNavMenu>
+    

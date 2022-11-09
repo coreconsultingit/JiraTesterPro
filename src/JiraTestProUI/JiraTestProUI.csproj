@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>disable</Nullable>
+    <UseWPF>true</UseWPF>
+	  <ApplicationIcon>Resources\AppIcon\ClarioIcon.ico</ApplicationIcon>
+  </PropertyGroup>
+	<ItemGroup>
+		<Content Include="Resources\AppIcon\ClarioIcon.ico">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+	<ItemGroup>
+	  <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Wpf" Version="6.0.547" />
+	  <PackageReference Include="MudBlazor" Version="6.0.18" />
+	  <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
+	  <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Pages\" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\JiraTesterProService\JiraTesterProService.csproj" />
+	</ItemGroup>
+
+
+</Project>

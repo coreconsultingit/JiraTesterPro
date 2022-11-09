@@ -56,7 +56,7 @@ namespace JiraTesterProService.JiraParser
                 var masterfile = new FileInfo(OutputJiraTestFilePathWithMaster);
 
                 var dir = new DirectoryInfo(OutputJiraTestFilePath);
-                return System.IO.Path.Combine(dir.FullName, Path.GetFileNameWithoutExtension(masterfile.Name), $"TestOutPut{DateTime.Now.ToString("yyyyMMdd")}.html");
+                return System.IO.Path.Combine(dir.FullName, Path.GetFileNameWithoutExtension(masterfile.Name), DateTime.Now.ToString("yyyyMMdd"), $"TestOutPut.html");
 
 
             }

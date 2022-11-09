@@ -19,6 +19,4 @@
             return standardTableName + tableName.StandardiseColumnTableName();
         }
     }
-
-
 }

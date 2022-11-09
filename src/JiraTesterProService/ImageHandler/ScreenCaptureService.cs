@@ -50,6 +50,12 @@ public class ScreenCaptureService : IScreenCaptureService
         try
         {
             var screenshot =  await ScreenshotUrlAsync(inputDto);
+            var dirInfo = new FileInfo(inputDto.FilePath).Directory;
+            if (!dirInfo.Exists)
+            {
+                Directory.CreateDirectory(dirInfo.FullName);
+            }
+
             await File.WriteAllBytesAsync(inputDto.FilePath, screenshot);
             
         }

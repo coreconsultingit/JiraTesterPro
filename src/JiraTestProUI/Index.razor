@@ -1,0 +1,41 @@
+﻿@page "/"
+@using MudBlazor
+
+<MudCard>
+   
+    <MudCardContent>
+        <MudText Typo="Typo.h5">Welcome to Jira Test Automation Pro</MudText>
+        <MudText Typo="Typo.body2">
+            ToDO
+        </MudText>
+       
+        
+         <MudList>
+        <MudListSubheader>
+                <MudText Typo="Typo.h6">
+                    Supported Data Sources:
+                </MudText>
+                
+        </MudListSubheader>
+            <MudListItem Icon="@Icons.Material.Filled.StarRate">
+                Excel imput
+        </MudListItem>
+        
+            
+
+        </MudList>
+        
+        
+    </MudCardContent>
+    <MudCardActions>
+        
+       @* <MudButton Variant="Variant.Text" Color="MudBlazor.Color.Primary" Link="Reconciliation">Try Reconciliation</MudButton>*@
+    </MudCardActions>
+</MudCard>
+
+@code{
+protected override void OnInitialized()
+        {
+            //AppState.IndexComponent = this;
+        }
+}

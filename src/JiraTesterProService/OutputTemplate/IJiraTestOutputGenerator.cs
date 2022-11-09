@@ -2,5 +2,5 @@
 
 public interface IJiraTestOutputGenerator
 {
-    string GetJiraOutPutTemplate(IList<JiraTestResult> lstTestResult);
+    Task<string> GetJiraOutPutTemplate(IList<JiraTestResult> lstTestResult);
 }

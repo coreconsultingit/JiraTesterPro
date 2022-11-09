@@ -26,7 +26,7 @@ public class JiraTestResultWriter : IJiraTestResultWriter
 
             var output = JiraTestOutputGenerator.GetJiraOutPutTemplate(lstJiraTestResult);
 
-            await File.WriteAllTextAsync(fileConfigProvider.OutputJiraTestFilePathWithMasterFile, output);
+            await File.WriteAllTextAsync(fileConfigProvider.OutputJiraTestFilePathWithMasterFile, await output);
 
             return true;
         }
