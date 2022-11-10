@@ -29,6 +29,7 @@ namespace JiraTestProUI
         protected IBrowserFile file ;
         private long maxFileSize = 1024 * 1024;
         protected bool Isloading { get; set; } = false;
+        
         [Inject]
         protected IJiraTestWorkflowRunner JiraTestWorkflowRunner { get; set; }
 
@@ -64,8 +65,9 @@ namespace JiraTestProUI
                 });
 
 
-                lstJiraTestResults=await JiraTestWorkflowRunner.RunJiraWorkflow();
+               lstJiraTestResults=await JiraTestWorkflowRunner.RunJiraWorkflow();
                 Isloading = false;
+                
 
             }
             catch (Exception ex)

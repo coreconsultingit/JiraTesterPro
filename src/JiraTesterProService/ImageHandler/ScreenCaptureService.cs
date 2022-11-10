@@ -23,7 +23,7 @@ public class ScreenCaptureService : IScreenCaptureService
 
         browser = await Puppeteer.LaunchAsync(new LaunchOptions()
         {
-            Headless = true,
+            Headless = false,
             DefaultViewport = new ViewPortOptions()
             {
                 Width = 1920,

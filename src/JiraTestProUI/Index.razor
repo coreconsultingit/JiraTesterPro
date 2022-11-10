@@ -8,8 +8,8 @@
 
 <MudText Typo="Typo.h5" Color="Color.Primary" Class="mb-4">Import test file</MudText>
 <MudContainer Class="mt-16" MaxWidth="MaxWidth.Large">
-    <MudGrid Spacing="6" Class="mt-16">
-        <MudItem md="10">
+    <MudGrid Class="mt-16">
+        <MudItem md="12">
 
             <MudGrid>
             @if(Isloading)
@@ -47,7 +47,7 @@
                 }
 
             </MudItem>
-            @if (!Isloading && lstJiraTestResults != null)
+           @* @if (!Isloading && lstJiraTestResults != null)
             {
       
                 <MudItem md="6">
@@ -77,14 +77,21 @@
                 </MudItem>
       
             }
-
+*@
 
             </MudGrid>
         </MudItem>
        
     </MudGrid>
+
+        <MudGrid>
+            
+            <MudItem md="12">
+                <iframe src="C:\temp\Jira BUG Matrix\20221110\TestOutPut.html" width="600" height="800" frameborder="0"></iframe>
+            </MudItem>
+        </MudGrid>
     
-   
+
      
 
 </MudContainer>
