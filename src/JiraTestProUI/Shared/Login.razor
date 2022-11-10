@@ -10,6 +10,16 @@
 <MudCard>
 
     <MudCardContent>
+        @if(Isloading)
+        {
+            <div class="d-flex align-center flex-column ma-10">
+                <MudProgressCircular Color="Color.Success" Indeterminate="true" Style="height:100px;width:100px">
+                </MudProgressCircular>
+                <MudText Typo="Typo.subtitle1" Class="mt-4 text-center">Data is Loading</MudText>
+
+            </div>
+        }
+
         <MudText Typo="Typo.h5">Welcome to Jira Test Automation Pro</MudText>
         <MudText Typo="Typo.body2">
             Please enter your Jira Credentials
@@ -17,11 +27,11 @@
 
         <MudPaper Class="pa-4">
             <EditForm Model="@model" OnValidSubmit="OnValidSubmit">
-                <DataAnnotationsValidator />
+                <DataAnnotationsValidator/>
 
-                <MudTextField Label="First name" HelperText="Jira User Name" @bind-Value="model.UserName" For="@(() => model.UserName)" />
+                <MudTextField Label="User name" HelperText="Jira User Name" @bind-Value="model.UserName" For="@(() => model.UserName)"/>
 
-                <MudTextField Label="Password" HelperText="Choose a strong password" @bind-Value="model.Password" For="@(() => model.Password)" InputType="InputType.Password" />
+                <MudTextField Label="Password" HelperText="Jira password" @bind-Value="model.Password" For="@(() => model.Password)" InputType="InputType.Password"/>
 
                 <div class="d-flex">
                     <MudRadioGroup RequiredError="Environment is required" @bind-SelectedOption="model.LoginUrl" For="@(() => model.LoginUrl)">
@@ -61,6 +71,7 @@
         var model = (JiraLogInDto)context.Model;
 
         Isloading = true;
+        
         UserCredentialProvider.AddJiraCredential(model);
         success = await ScreenCaptureService.SetStartSession();
 
