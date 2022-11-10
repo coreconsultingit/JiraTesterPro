@@ -9,6 +9,7 @@ using JiraTesterProService.FileHandler;
 using JiraTesterProService.ImageHandler;
 using JiraTesterProService.JiraParser;
 using JiraTesterProService.OutputTemplate;
+using JiraTesterProService.Workflow;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -62,6 +63,7 @@ namespace JiraTesterProService
             services.AddScoped(typeof(IDataTableParser<>), typeof(DataTableParser<>));
             services.AddSingleton<IUserCredentialProvider, UserCredentialProvider>();
             services.AddSingleton<IJiraFileConfigProvider, JiraFileConfigProvider>();
+            services.AddScoped<IJiraTestWorkflowRunner, JiraTestWorkflowRunner>();
             RegisterJiraClientProvider(services);
            
             ServiceProvider = services.BuildServiceProvider();

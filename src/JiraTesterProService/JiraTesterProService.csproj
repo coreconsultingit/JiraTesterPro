@@ -32,4 +32,8 @@
     <ProjectReference Include="..\JiraTesterProData\JiraTesterProData.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Workflow\" />
+  </ItemGroup>
+
 </Project>

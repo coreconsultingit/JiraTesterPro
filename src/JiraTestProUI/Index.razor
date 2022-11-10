@@ -3,6 +3,7 @@
 @using JiraTestProUI.Shared
 @using Color = MudBlazor.Color
 @using System.IO
+@using JiraTesterProData
 @inherits IndexBase
 
 <MudText Typo="Typo.h5" Color="Color.Primary" Class="mb-4">Import test file</MudText>
@@ -11,49 +12,81 @@
         <MudItem md="10">
 
             <MudGrid>
+            @if(Isloading)
+            {
+                <MudItem md="6">
+                   
+                    <div class="d-flex align-center flex-column ma-10">
+                        <MudProgressCircular Color="Color.Success" Indeterminate="true" Style="height:100px;width:100px">
+                        </MudProgressCircular>
+                        <MudText Typo="Typo.subtitle1" Class="mt-4 text-center">Data is Loading</MudText>
+
+                    </div>
+                   
+                </MudItem>
+            }
+            <MudItem md="6">
                 
+                <MudTextField T="string" Label="OutPutFilePath" @bind-Value="OutputFilePath"/>
+                <label style="box-shadow: 0 2px 7px #4caf50; display: inline-flex; width: 150px; justify-content: space-around; border-radius: 2em; color: white; border: 2px solid; cursor: pointer; align-items: center; padding: 16px; background-color: #4caf50;"
+                       for="fileInput2">
+                    Upload <MudIcon Icon="@Icons.Filled.CloudUpload"/>
+                </label>
+
+                <InputFile id="fileInput2" OnChange="UploadFiles" hidden single excel accept=".xlsx"/>
+                @if (file != null)
+                {
+                    <MudList>
+
+                        <MudListItem Icon="@Icons.Filled.AttachFile">
+                            @file.Name <code>@file.Size bytes</code>
+                        </MudListItem>
+
+
+                    </MudList>
+                }
+
+            </MudItem>
+            @if (!Isloading && lstJiraTestResults != null)
+            {
+      
                 <MudItem md="6">
-                    @if(Isloading)
-                    {
-                        <div class="d-flex align-center flex-column ma-10">
-                            <MudProgressCircular Color="Color.Success" Indeterminate="true" Style="height:100px;width:100px">
-                            </MudProgressCircular>
-                            <MudText Typo="Typo.subtitle1" Class="mt-4 text-center">Data is Loading</MudText>
+                    <MudCard>
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h6">Test Result By Status</MudText>
+                            </CardHeaderContent>
+                
+                        </MudCardHeader>
+                        <MudCardContent>
+               
+                            <ApexChart TItem="JiraTestResult">
 
-                        </div>
-                    }
-                </MudItem>
-                <MudItem md="6">
-                    <MudTextField T="string" Label="OutPutFilePath" @bind-Value="OutputFilePath"/>
-                </MudItem>
-
-                <MudItem md="12">
-                    <label style="box-shadow: 0 2px 7px #4caf50; display: inline-flex; width: 150px; justify-content: space-around; border-radius: 2em; color: white; border: 2px solid; cursor: pointer; align-items: center; padding: 16px; background-color: #4caf50;"
-                           for="fileInput2">
-                        Upload <MudIcon Icon="@Icons.Filled.CloudUpload"/>
-                    </label>
-
-                    <InputFile id="fileInput2" OnChange="UploadFiles" hidden single zip accept=".xlsx"/>
-                    @if (file != null)
-                    {
-                        <MudList>
-                            @*@foreach (var file in files)
-                                {*@
-                            <MudListItem Icon="@Icons.Filled.AttachFile">
-                                @file.Name <code>@file.Size bytes</code>
-                            </MudListItem>
-
-                            @*}*@
-                        </MudList>
-                    }
+                                <ApexPointSeries TItem="JiraTestResult"
+                                                 Items="lstJiraTestResults"
+                                                 SeriesType="SeriesType.Donut"
+                                                 Name="Count"
+                                                 XValue="@(e => e.TestStatus)"
+                                                 YAggregate="@(e => e.Count())"
+                                                 OrderByDescending="e=>e.Y" ShowDataLabels  />
+                            </ApexChart>
+                        </MudCardContent>
+            
+                    </MudCard>
 
                 </MudItem>
+      
+            }
 
 
             </MudGrid>
         </MudItem>
        
     </MudGrid>
+    
+   
+     
+
 </MudContainer>
 
 

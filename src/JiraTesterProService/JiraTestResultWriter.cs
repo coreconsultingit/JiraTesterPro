@@ -7,12 +7,14 @@ namespace JiraTesterProService;
 
 public class JiraTestResultWriter : IJiraTestResultWriter
 {
-    private IJiraTestOutputGenerator JiraTestOutputGenerator;
-    private JiraFileConfigProvider fileConfigProvider;
-    public JiraTestResultWriter(IJiraTestOutputGenerator jiraTestOutputGenerator, JiraFileConfigProvider fileConfigProvider)
+    private IJiraTestOutputGenerator jiraTestOutputGenerator;
+    private IJiraFileConfigProvider fileConfigProvider;
+    private ILogger<JiraTestResultWriter> logger;
+    public JiraTestResultWriter(IJiraTestOutputGenerator jiraTestOutputGenerator, IJiraFileConfigProvider fileConfigProvider, ILogger<JiraTestResultWriter> logger)
     {
-        JiraTestOutputGenerator = jiraTestOutputGenerator;
+        this.jiraTestOutputGenerator = jiraTestOutputGenerator;
         this.fileConfigProvider = fileConfigProvider;
+        this.logger = logger;
     }
 
     public async Task<bool> WriteTestResult(IList<JiraTestResult> lstJiraTestResult)
@@ -23,8 +25,14 @@ public class JiraTestResultWriter : IJiraTestResultWriter
             {
                 File.Delete(fileConfigProvider.OutputJiraTestFilePathWithMasterFile);
             }
+            //TODO: handle all this in central place
+            var directory = new FileInfo(fileConfigProvider.OutputJiraTestFilePathWithMasterFile).DirectoryName;
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
 
-            var output = JiraTestOutputGenerator.GetJiraOutPutTemplate(lstJiraTestResult);
+            var output = jiraTestOutputGenerator.GetJiraOutPutTemplate(lstJiraTestResult);
 
             await File.WriteAllTextAsync(fileConfigProvider.OutputJiraTestFilePathWithMasterFile, await output);
 
@@ -32,7 +40,7 @@ public class JiraTestResultWriter : IJiraTestResultWriter
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            logger.LogError(e.Message);
             throw;
         }
 

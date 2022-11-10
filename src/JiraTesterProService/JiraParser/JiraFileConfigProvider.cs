@@ -13,8 +13,10 @@ namespace JiraTesterProService.JiraParser
         string OutputJiraTestFilePathWithMaster { get; }
 
         void InitializeConfig(FileConfigDto fileConfigDto);
-
+        FileConfigDto GetFileConfigDto();
     }
+
+    //TODo: refactor this clas better
     public class JiraFileConfigProvider: IJiraFileConfigProvider
     {
         
@@ -31,6 +33,18 @@ namespace JiraTesterProService.JiraParser
         public void InitializeConfig(FileConfigDto fileConfigDto)
         {
             memoryCache.Set(CacheConst.FileConfig, fileConfigDto);
+        }
+
+        public FileConfigDto GetFileConfigDto()
+        {
+            memoryCache.TryGetValue(CacheConst.FileConfig, out FileConfigDto fileConfigDto);
+            if (fileConfigDto == null)
+            {
+                logger.LogError("File Config not initialized");
+                throw new Exception("File Config not initialized");
+            }
+
+            return fileConfigDto;
         }
 
         public string OutputJiraTestFilePathWithMaster
