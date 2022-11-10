@@ -13,6 +13,7 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.Finance.Implementations;
 using System;
 using JiraTesterProService.JiraParser;
 using JiraTesterProService.Workflow;
+using JiraTesterProService.ImageHandler;
 
 namespace JiraTesterProMain;
 
@@ -55,9 +56,13 @@ class Program
                 Log.Logger.Error("Either one of bug or test file should be provided");
             }
 
+            var screenCaptureService = serviceProvider.GetService<IScreenCaptureService>();
+            await screenCaptureService.SetStartSession();
             var workflowRunner = serviceProvider.GetService<IJiraTestWorkflowRunner>();
 
             await workflowRunner.RunJiraWorkflow();
+
+            await screenCaptureService.CloseSession();
 
         }
         catch (Exception e)

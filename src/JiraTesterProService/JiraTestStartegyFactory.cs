@@ -46,7 +46,7 @@ public class JiraTestStartegyFactory : IJiraTestStartegyFactory
     public async Task<IList<JiraTestResult>> GetJiraTestStrategyResult(IList<JiraTestMasterDto> jiraTestMasterDto)
     {
 
-        await screenCaptureService.SetStartSession();
+      
         var orderedTests = jiraTestMasterDto.OrderBy(x => x.GroupKey).ThenBy(x => x.OrderId).ThenBy(x=>x.IssueType);
 
         var lstTaskResults = new List<JiraTestResult>();
@@ -79,7 +79,7 @@ public class JiraTestStartegyFactory : IJiraTestStartegyFactory
             
         }
 
-        await screenCaptureService.CloseBrowserAndPage();
+       
         return lstTaskResults;
     }
 }

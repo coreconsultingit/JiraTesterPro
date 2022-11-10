@@ -109,7 +109,7 @@ public class ScreenCaptureService : IScreenCaptureService
         
     }
 
-    public async Task CloseBrowserAndPage()
+    public async Task CloseSession()
     {
         if (page != null)
         {

@@ -11,6 +11,6 @@ namespace JiraTesterProService.ImageHandler
     {
         Task<bool> CaptureScreenShot(ScreenShotInputDto inputDto);
         Task<bool> SetStartSession();
-        Task CloseBrowserAndPage();
+        Task CloseSession();
     }
 }

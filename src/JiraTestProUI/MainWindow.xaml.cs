@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -79,10 +80,10 @@ namespace JiraTestProUI
             }
         }
 
-        protected void Window_Closed(object sender, EventArgs e)
+        protected async void Window_Closing(object sender, CancelEventArgs cancelEventArgs)
         {
             screenCaptureService = provider.GetService<IScreenCaptureService>();
-            screenCaptureService.CloseBrowserAndPage();
+            await screenCaptureService.CloseSession();
         }
     }
 }

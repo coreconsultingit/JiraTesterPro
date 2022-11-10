@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:JiraTestProUI"
         xmlns:blazor="clr-namespace:Microsoft.AspNetCore.Components.WebView.Wpf;assembly=Microsoft.AspNetCore.Components.WebView.Wpf"
         mc:Ignorable="d"
-        Title="MainWindow" Closed="Window_Closed">
+        Title="MainWindow" Closing="Window_Closing" >
     <Grid>
 
         <blazor:BlazorWebView HostPage="wwwroot\index.html" Services="{DynamicResource services}">

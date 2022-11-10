@@ -25,7 +25,7 @@ namespace JiraTesterProTestFixture
             });
             Assert.IsTrue(result);
 
-            await screencaptureService.CloseBrowserAndPage();
+            await screencaptureService.CloseSession();
         }
     }
 }

@@ -51,7 +51,7 @@ namespace JiraTesterProService
             //services.AddScoped<IExcelWriter, ExcelWriter>();
             services.AddScoped<IFileFactory, FileFactory>();
             services.AddScoped<IFileHandlerFactory, FileHandlerFactory>();
-            services.AddScoped<IScreenCaptureService, ScreenCaptureService>();
+            services.AddSingleton<IScreenCaptureService, ScreenCaptureService>();
             services.AddScoped<IJiraTestOutputGenerator, JiraTestOutputGenerator>();
 
             services.AddScoped<DelimettedFileService>()
