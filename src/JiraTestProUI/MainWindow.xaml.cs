@@ -36,7 +36,7 @@ namespace JiraTestProUI
         {
             InitializeComponent();
 
-            var logFilePath = $"{FileUtillity.AssemblyDirectory}\\..\\log\\Clarioreporterlog.txt";
+            var logFilePath = $"..\\log\\Clarioreporterlog.txt";
             try
             {
 

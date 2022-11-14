@@ -12,6 +12,7 @@ public static class FileUtillity
 
         {
 
+
             string codeBase = Assembly.GetExecutingAssembly().Location;
 
             UriBuilder uri = new UriBuilder(codeBase);
