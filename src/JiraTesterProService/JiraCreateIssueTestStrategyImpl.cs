@@ -2,6 +2,7 @@
 using System.Text.Json;
 using Atlassian.Jira;
 using JiraTesterProData;
+using JiraTesterProData.JiraMapper;
 using JiraTesterProService.ImageHandler;
 using JiraTesterProService.JiraParser;
 using Microsoft.Extensions.Logging;
@@ -14,12 +15,14 @@ public class JiraCreateIssueTestStrategyImpl : JiraTestStrategy
 {
    
     private ILogger<JiraCreateIssueTestStrategyImpl> logger;
-   
-    public JiraCreateIssueTestStrategyImpl(IJiraClientProvider jiraClientProvider, ILogger<JiraCreateIssueTestStrategyImpl> logger, IJiraFileConfigProvider fileConfigProvider, IScreenCaptureService screenCaptureService):base(jiraClientProvider, fileConfigProvider, screenCaptureService,logger)
+    private IDictionary<string, JiraRootobject> dictProjectWithJira = new Dictionary<string, JiraRootobject>();
+    private IDictionary<string, JiraIssuetype> dictProjectWithIssueTypeJira = new Dictionary<string, JiraIssuetype>();
+    private IJiraCustomParser jiraCustomParser;
+    public JiraCreateIssueTestStrategyImpl(IJiraClientProvider jiraClientProvider, ILogger<JiraCreateIssueTestStrategyImpl> logger, IJiraFileConfigProvider fileConfigProvider, IScreenCaptureService screenCaptureService, IJiraCustomParser jiraCustomParser):base(jiraClientProvider, fileConfigProvider, screenCaptureService,logger)
     {
         this.jiraClientProvider = jiraClientProvider;
         this.logger = logger;
-        
+        this.jiraCustomParser = jiraCustomParser;
     }
 
     public override async Task<JiraTestResult> Execute(JiraTestMasterDto jiraTestMasterDto)
@@ -28,6 +31,7 @@ public class JiraCreateIssueTestStrategyImpl : JiraTestStrategy
 
         //var wf = await jiraClient.RestClient.ExecuteRequestAsync<JObject>(Method.GET, "rest/api/2/issue/createmeta?projectKeys=ECOA&expand=projects.issuetypes.fields");
         //var test = wf.ToString();
+        ///rest/api/3/issuetypescreenscheme/project?projectId={projectKey}
         var jiraTestResult = new JiraTestResult()
         {
             JiraTestMasterDto = jiraTestMasterDto
@@ -39,6 +43,9 @@ public class JiraCreateIssueTestStrategyImpl : JiraTestStrategy
              var issueType = dictIssueType[jiraTestMasterDto.Project];
             var type = issueType.Where(x => x.Name.EqualsWithIgnoreCase(jiraTestMasterDto.IssueType)).FirstOrDefault();
             var issueCreated = jiraClient.CreateIssue(jiraTestMasterDto.Project);
+            await PopulateRequiredFields(jiraTestMasterDto);
+
+
             issueCreated.Summary = jiraTestMasterDto.Summary;
             issueCreated.Type = type;
             
@@ -80,5 +87,60 @@ public class JiraCreateIssueTestStrategyImpl : JiraTestStrategy
 
 
 
+    }
+
+
+    private async Task PopulateRequiredFields(JiraTestMasterDto dto)
+    {
+        var projectCodeVal = dto.Project;
+
+        if (!dictProjectWithJira.ContainsKey(projectCodeVal))
+        {
+            dictProjectWithJira.Add(projectCodeVal, await jiraCustomParser.GetParsedJiraRootBasedOnProject(projectCodeVal));
+        }
+        var root = dictProjectWithJira[dto.Project];
+        var key = $"{dto.Project}_{dto.IssueType}";
+        if (!dictProjectWithIssueTypeJira.ContainsKey(key))
+        {
+            var field = root.projects[0].issuetypes.Where(x => x.name.EqualsWithIgnoreCase(dto.IssueType))
+                .FirstOrDefault();
+            if (field == null)
+            {
+                logger.LogError($"Issue type {dto.IssueType} not found for {dto.Project}");
+                return;
+            }
+
+            dictProjectWithIssueTypeJira.Add(key, field);
+        }
+
+
+        //Summary
+        var fielddefinition = dictProjectWithIssueTypeJira[key].fields;
+        if (fielddefinition.summary.required)
+        {
+            dto.Summary = "Test Summary";
+        }
+
+        if (fielddefinition.components.required)
+        {
+            dto.Component = fielddefinition.components.allowedValues[0].name;
+        }
+
+        var customFieldinput = new List<string>();
+        foreach (var customfield in fielddefinition.Customfield)
+        {
+            if (customfield.required && !customfield.hasDefaultValue)
+            {
+                if (customfield.allowedValues.Any())
+                {
+                    customFieldinput.Add($"{customfield.name}:{customfield.allowedValues[0].value}");
+                }
+                else
+                {
+                    customFieldinput.Add($"{customfield.name}:Test");
+                }
+            }
+        }
+        dto.CustomFieldInput = string.Join("|", customFieldinput);
     }
 }

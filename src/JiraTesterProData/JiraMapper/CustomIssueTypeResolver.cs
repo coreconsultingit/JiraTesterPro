@@ -139,16 +139,16 @@ public class Customfield
    
     public bool required { get; set; }
 
-    public Schema3 schema { get; set; }
+    public CustomeFieldSchema schema { get; set; }
     public string name { get; set; }
     public string fieldId { get; set; }
     public bool hasDefaultValue { get; set; }
     public string[] operations { get; set; }
-    public Allowedvalue2[] allowedValues { get; set; }
+    public CustomFieldAllowedvalue[] allowedValues { get; set; }
     public Defaultvalue defaultValue { get; set; }
 }
 
-public class Schema3
+public class CustomeFieldSchema
 {
     public string type { get; set; }
     public string custom { get; set; }
@@ -162,7 +162,7 @@ public class Defaultvalue
     public string id { get; set; }
 }
 
-public class Allowedvalue2
+public class CustomFieldAllowedvalue
 {
     public string self { get; set; }
     public string value { get; set; }

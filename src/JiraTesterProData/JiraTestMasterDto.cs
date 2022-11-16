@@ -1,4 +1,6 @@
-﻿namespace JiraTesterProData;
+﻿using JiraTesterProData.JiraMapper;
+
+namespace JiraTesterProData;
 
 public class JiraTestMasterDto
 {
@@ -38,5 +40,6 @@ public class JiraTestMasterDto
     public bool IsSubTask { get; set; }
 
     public IList<ScreenTestDto> ScreenTestDto { get; set; }
+    public JiraFields JiraField { get; set; }
 
 }

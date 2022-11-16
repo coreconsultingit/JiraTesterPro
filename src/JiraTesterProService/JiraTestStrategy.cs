@@ -38,6 +38,8 @@ namespace JiraTesterProService
         }
        
 
+
+
         protected async Task TakeScreenShotAfterAction(JiraTestResult result)
         {
             var imagePath = Path.Combine(jiraFileConfigProvider.OutputJiraTestFilePathWithMaster, DateTime.Now.ToString("yyyyMMdd"), result.JiraTestMasterDto.GroupKey,

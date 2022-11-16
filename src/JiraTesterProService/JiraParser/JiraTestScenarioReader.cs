@@ -9,14 +9,12 @@ namespace JiraTesterProService.JiraParser;
 public class JiraTestScenarioReader : IJiraTestScenarioReader
 {
     private ILogger<JiraTestScenarioReader> logger;
-    private IJiraCustomParser jiraCustomParser;
-    private IDictionary<string, JiraRootobject> dictProjectWithJira = new Dictionary<string, JiraRootobject>();
-    private IDictionary<string, JiraIssuetype> dictProjectWithIssueTypeJira = new Dictionary<string, JiraIssuetype>();
+    
     private IDataTableParser<ScreenTestDto> screenTestDataTableParser;
-    public JiraTestScenarioReader(ILogger<JiraTestScenarioReader> logger, IJiraCustomParser jiraCustomParser, IDataTableParser<ScreenTestDto> screenTestDataTableParser)
+    public JiraTestScenarioReader(ILogger<JiraTestScenarioReader> logger, IDataTableParser<ScreenTestDto> screenTestDataTableParser)
     {
         this.logger = logger;
-        this.jiraCustomParser = jiraCustomParser;
+        
         this.screenTestDataTableParser = screenTestDataTableParser;
     }
 
@@ -64,12 +62,7 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
                         }
 
 
-                        var projectCodeVal = projectCode.GetNoneIfEmptyOrNull();
-
-                        if (!dictProjectWithJira.ContainsKey(projectCodeVal))
-                        {
-                            dictProjectWithJira.Add(projectCodeVal, await jiraCustomParser.GetParsedJiraRootBasedOnProject(projectCodeVal));
-                        }
+                       
 
                         var groupCode = worksheet.Cells[celladdress.Start.Row + 2, celladdress.Start.Column].Value;
 
@@ -98,7 +91,7 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
                                 FileName = $"{fi.Name}_{worksheet.Name}"
                             };
 
-                            PopulateRequiredFields(test);
+                           // PopulateRequiredFields(test);
                             //Read the Screenscenario
                             var screenworksheetName = $"{issueType.GetNoneIfEmptyOrNull()} - {test.Status} Screen";
                             var screenworksheet =
@@ -201,53 +194,7 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
     }
 
 
-    public void PopulateRequiredFields(JiraTestMasterDto dto)
-    {
-        var root = dictProjectWithJira[dto.Project];
-        var key = $"{dto.Project}_{dto.IssueType}";
-        if (!dictProjectWithIssueTypeJira.ContainsKey(key))
-        {
-            var field = root.projects[0].issuetypes.Where(x => x.name.EqualsWithIgnoreCase(dto.IssueType))
-                .FirstOrDefault();
-            if (field == null)
-            {
-                logger.LogError($"Issue type {dto.IssueType} not found for {dto.Project}");
-                return;
-            }
-
-            dictProjectWithIssueTypeJira.Add(key, field);
-        }
-
-
-        //Summary
-        var fielddefinition = dictProjectWithIssueTypeJira[key].fields;
-        if (fielddefinition.summary.required)
-        {
-            dto.Summary = "Test Summary";
-        }
-
-        if (fielddefinition.components.required)
-        {
-            dto.Component = fielddefinition.components.allowedValues[0].name;
-        }
-
-        var customFieldinput = new List<string>();
-        foreach (var customfield in fielddefinition.Customfield)
-        {
-            if (customfield.required && !customfield.hasDefaultValue)
-            {
-                if (customfield.allowedValues.Any())
-                {
-                    customFieldinput.Add($"{customfield.name}:{customfield.allowedValues[0].value}");
-                }
-                else
-                {
-                    customFieldinput.Add($"{customfield.name}:Test");
-                }
-            }
-        }
-        dto.CustomFieldInput = string.Join("|", customFieldinput);
-    }
+    
 
     private string GetAction(string val)
     {
