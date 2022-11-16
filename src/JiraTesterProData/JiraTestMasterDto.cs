@@ -4,6 +4,8 @@ public class JiraTestMasterDto
 {
     public int StepId { get; set; }
 
+    public string FileName { get; set; }
+
     public string ParentIssueKey{ get; set; }
 
     public string Scenario { get; set; }

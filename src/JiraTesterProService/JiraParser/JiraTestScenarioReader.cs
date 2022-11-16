@@ -22,9 +22,10 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
 
 
         var lstJiraMasterDto = new List<JiraTestMasterDto>();
+        FileInfo fi = new FileInfo(path);
         try
         {
-            using (var package = new ExcelPackage(File.Open(path, FileMode.Open)))
+            using (var package = new ExcelPackage(fi.Open(FileMode.Open)))
             {
                 var workbook = package.Workbook;
 
@@ -43,8 +44,7 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
                     {
 
                         var dictTestCell = new Dictionary<string, int>();
-                        DataTable tbl = new DataTable();
-                        var columnlist = new List<string>();
+                        
 
                         var projectCode = worksheet.Cells[celladdress.Start.Row, celladdress.Start.Column + 1].Value;
 
@@ -70,42 +70,45 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
 
                         var groupCode = worksheet.Cells[celladdress.Start.Row + 2, celladdress.Start.Column].Value;
                         int iCounter = 1;
-                        foreach (var firstRowCell in worksheet.Cells[celladdress.Start.Row + 2, 1, celladdress.Start.Row + 2, worksheet.Dimension.End.Column])
-                        {
-                            var columnname = firstRowCell.Text.StandardiseColumnTableName();
-                            if (columnlist.Contains(columnname))
-                            {
-                                columnname += iCounter.ToString();
-                                iCounter += 1;
-                            }
-                            tbl.Columns.Add(columnname);
-                            columnlist.Add(columnname);
-                        }
-                        for (int rowNum = celladdress.Start.Row + 3; rowNum <= worksheet.Dimension.End.Row; rowNum++)
-                        {
-                            var endcolumn = worksheet.Dimension.End.Column;
-                            var wsRow = worksheet.Cells[rowNum, 1, rowNum, endcolumn];
-                            if (wsRow.All(c => c.Value == null))
-                            {
-                                break;
-                            }
+                        //foreach (var firstRowCell in worksheet.Cells[celladdress.Start.Row + 2, 1, celladdress.Start.Row + 2, worksheet.Dimension.End.Column])
+                        //{
+                        //    var columnname = firstRowCell.Text.StandardiseColumnTableName();
+                        //    if (columnlist.Contains(columnname))
+                        //    {
+                        //        columnname += iCounter.ToString();
+                        //        iCounter += 1;
+                        //    }
+                        //    tbl.Columns.Add(columnname);
+                        //    columnlist.Add(columnname);
+                        //}
+                        var tbl = ReadTableContent(celladdress, worksheet, celladdress.Start.Row + 2);//ReadColum(worksheet, celladdress.Start.Row + 2);
+                        
+
+                        //for (int rowNum = celladdress.Start.Row + 3; rowNum <= worksheet.Dimension.End.Row; rowNum++)
+                        //{
+                        //    var endcolumn = worksheet.Dimension.End.Column;
+                        //    var wsRow = worksheet.Cells[rowNum, 1, rowNum, endcolumn];
+                        //    if (wsRow.All(c => c.Value == null))
+                        //    {
+                        //        break;
+                        //    }
 
 
-                            DataRow row = tbl.Rows.Add();
-                            foreach (var cell in wsRow)
-                            {
-                                try
-                                {
-                                    row[cell.Start.Column - 1] = cell.Text;
-                                }
-                                catch (Exception e)
-                                {
-                                    logger.LogError(e.Message + e.InnerException);
+                        //    DataRow row = tbl.Rows.Add();
+                        //    foreach (var cell in wsRow)
+                        //    {
+                        //        try
+                        //        {
+                        //            row[cell.Start.Column - 1] = cell.Text;
+                        //        }
+                        //        catch (Exception e)
+                        //        {
+                        //            logger.LogError(e.Message + e.InnerException);
 
-                                }
+                        //        }
 
-                            }
-                        }
+                        //    }
+                        //}
 
 
                         for (int i = 0; i < tbl.Rows.Count; i++)
@@ -127,7 +130,8 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
                                 ExpectedStatus = tbl.Rows[dictTestCell["Resulting Status"]].ItemArray[i].GetNoneIfEmptyOrNull(),
                                 Expectation = JiraTestStatusEnum.Passed.ToString(),
                                 Status = tbl.Rows[dictTestCell["Button (Transition)"]].ItemArray[i].GetNoneIfEmptyOrNull(),
-                                Scenario = tbl.Rows[dictTestCell["Scenario/Step"]].ItemArray[i].GetNoneIfEmptyOrNull()
+                                Scenario = tbl.Rows[dictTestCell["Scenario/Step"]].ItemArray[i].GetNoneIfEmptyOrNull(),
+                                FileName = $"{fi.Name}_{worksheet.Name}"
                             };
 
                             PopulateRequiredFields(test);
@@ -135,6 +139,8 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
                             lstJiraMasterDto.Add(test);
                             iStepId = iStepId + 1;
                         }
+
+                        //Read the Screenscenaruio
                     }
                 }
             }
@@ -148,6 +154,55 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
         }
 
         
+    }
+    private DataTable ReadColum(ExcelWorksheet worksheet, int startRow)
+    {
+        var columnlist = new List<string>();
+        DataTable tbl = new DataTable();
+        int iCounter = 1;
+        foreach (var firstRowCell in worksheet.Cells[startRow, 1, startRow,
+                     worksheet.Dimension.End.Column])
+        {
+            var columnname = firstRowCell.Text.StandardiseColumnTableName();
+            if (columnlist.Contains(columnname))
+            {
+                columnname += iCounter.ToString();
+                iCounter += 1;
+            }
+
+            tbl.Columns.Add(columnname);
+            columnlist.Add(columnname);
+        }
+
+        return tbl;
+    }
+    private DataTable ReadTableContent(ExcelRangeBase celladdress, ExcelWorksheet worksheet, int startRow)
+    {
+        var tbl = ReadColum(worksheet, startRow);
+        for (int rowNum = startRow + 1; rowNum <= worksheet.Dimension.End.Row; rowNum++)
+        {
+            var endcolumn = worksheet.Dimension.End.Column;
+            var wsRow = worksheet.Cells[rowNum, 1, rowNum, endcolumn];
+            if (wsRow.All(c => c.Value == null))
+            {
+                break;
+            }
+
+            DataRow row = tbl.Rows.Add();
+            foreach (var cell in wsRow)
+            {
+                try
+                {
+                    row[cell.Start.Column - 1] = cell.Text;
+                }
+                catch (Exception e)
+                {
+                    logger.LogError(e.Message + e.InnerException);
+                }
+            }
+        }
+
+        return tbl;
     }
 
 
