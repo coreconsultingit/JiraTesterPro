@@ -22,122 +22,132 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
 
 
         var lstJiraMasterDto = new List<JiraTestMasterDto>();
-        using (var package = new ExcelPackage(File.Open(path, FileMode.Open)))
+        try
         {
-            var workbook = package.Workbook;
-
-            int iStepId = 0;
-            foreach (var worksheet in workbook.Worksheets)
+            using (var package = new ExcelPackage(File.Open(path, FileMode.Open)))
             {
-                int rowStart = worksheet.Dimension.Start.Row;
-                int rowEnd = worksheet.Dimension.End.Row;
-                string cellRange = rowStart.ToString() + ":" + rowEnd.ToString();
-                var searchCell = from cell in worksheet.Cells[cellRange] //you can define your own range of cells for lookup
-                                 where cell.Value.GetNoneIfEmptyOrNull().EqualsWithIgnoreCase("ProjectCode")
-                                 select cell;
+                var workbook = package.Workbook;
 
-
-                foreach (var celladdress in searchCell)
+                int iStepId = 0;
+                foreach (var worksheet in workbook.Worksheets.Where(x => x.Name.ContainsWithIgnoreCase("WorkFlow")))
                 {
+                    int rowStart = worksheet.Dimension.Start.Row;
+                    int rowEnd = worksheet.Dimension.End.Row;
+                    string cellRange = rowStart.ToString() + ":" + rowEnd.ToString();
+                    var searchCell = from cell in worksheet.Cells[cellRange] //you can define your own range of cells for lookup
+                                     where cell.Value.GetNoneIfEmptyOrNull().EqualsWithIgnoreCase("ProjectCode")
+                                     select cell;
 
-                    var dictTestCell = new Dictionary<string, int>();
-                    DataTable tbl = new DataTable();
-                    var columnlist = new List<string>();
 
-                    var projectCode = worksheet.Cells[celladdress.Start.Row, celladdress.Start.Column + 1].Value;
-
-                    if (projectCode == null)
+                    foreach (var celladdress in searchCell)
                     {
-                        logger.LogError($"No project code found at row {celladdress.Start.Row} column {celladdress.Start.Column + 1}");
-                    }
 
-                    var issueType = worksheet.Cells[celladdress.Start.Row + 1, celladdress.Start.Column + 1].Value;
+                        var dictTestCell = new Dictionary<string, int>();
+                        DataTable tbl = new DataTable();
+                        var columnlist = new List<string>();
 
-                    if (issueType == null)
-                    {
-                        logger.LogError($"No issue type found at row {celladdress.Start.Row + 1} column {celladdress.Start.Column + 1}");
-                    }
+                        var projectCode = worksheet.Cells[celladdress.Start.Row, celladdress.Start.Column + 1].Value;
 
-
-                    var projectCodeVal = projectCode.GetNoneIfEmptyOrNull();
-
-                    if (!dictProjectWithJira.ContainsKey(projectCodeVal))
-                    {
-                        dictProjectWithJira.Add(projectCodeVal, await jiraCustomParser.GetParsedJiraRootBasedOnProject(projectCodeVal));
-                    }
-
-                    var groupCode = worksheet.Cells[celladdress.Start.Row + 2, celladdress.Start.Column].Value;
-                    int iCounter = 1;
-                    foreach (var firstRowCell in worksheet.Cells[celladdress.Start.Row + 2, 1, celladdress.Start.Row + 2, worksheet.Dimension.End.Column])
-                    {
-                        var columnname = firstRowCell.Text.StandardiseColumnTableName();
-                        if (columnlist.Contains(columnname))
+                        if (projectCode == null)
                         {
-                            columnname += iCounter.ToString();
-                            iCounter += 1;
+                            logger.LogError($"No project code found at row {celladdress.Start.Row} column {celladdress.Start.Column + 1}");
                         }
-                        tbl.Columns.Add(columnname);
-                        columnlist.Add(columnname);
-                    }
-                    for (int rowNum = celladdress.Start.Row + 3; rowNum <= worksheet.Dimension.End.Row; rowNum++)
-                    {
-                        var endcolumn = worksheet.Dimension.End.Column;
-                        var wsRow = worksheet.Cells[rowNum, 1, rowNum, endcolumn];
-                        if (wsRow.All(c => c.Value == null))
+
+                        var issueType = worksheet.Cells[celladdress.Start.Row + 1, celladdress.Start.Column + 1].Value;
+
+                        if (issueType == null)
                         {
-                            break;
+                            logger.LogError($"No issue type found at row {celladdress.Start.Row + 1} column {celladdress.Start.Column + 1}");
                         }
 
 
-                        DataRow row = tbl.Rows.Add();
-                        foreach (var cell in wsRow)
+                        var projectCodeVal = projectCode.GetNoneIfEmptyOrNull();
+
+                        if (!dictProjectWithJira.ContainsKey(projectCodeVal))
                         {
-                            try
+                            dictProjectWithJira.Add(projectCodeVal, await jiraCustomParser.GetParsedJiraRootBasedOnProject(projectCodeVal));
+                        }
+
+                        var groupCode = worksheet.Cells[celladdress.Start.Row + 2, celladdress.Start.Column].Value;
+                        int iCounter = 1;
+                        foreach (var firstRowCell in worksheet.Cells[celladdress.Start.Row + 2, 1, celladdress.Start.Row + 2, worksheet.Dimension.End.Column])
+                        {
+                            var columnname = firstRowCell.Text.StandardiseColumnTableName();
+                            if (columnlist.Contains(columnname))
                             {
-                                row[cell.Start.Column - 1] = cell.Text;
+                                columnname += iCounter.ToString();
+                                iCounter += 1;
                             }
-                            catch (Exception e)
+                            tbl.Columns.Add(columnname);
+                            columnlist.Add(columnname);
+                        }
+                        for (int rowNum = celladdress.Start.Row + 3; rowNum <= worksheet.Dimension.End.Row; rowNum++)
+                        {
+                            var endcolumn = worksheet.Dimension.End.Column;
+                            var wsRow = worksheet.Cells[rowNum, 1, rowNum, endcolumn];
+                            if (wsRow.All(c => c.Value == null))
                             {
-                                logger.LogError(e.Message + e.InnerException);
-
+                                break;
                             }
 
+
+                            DataRow row = tbl.Rows.Add();
+                            foreach (var cell in wsRow)
+                            {
+                                try
+                                {
+                                    row[cell.Start.Column - 1] = cell.Text;
+                                }
+                                catch (Exception e)
+                                {
+                                    logger.LogError(e.Message + e.InnerException);
+
+                                }
+
+                            }
                         }
-                    }
 
 
-                    for (int i = 0; i < tbl.Rows.Count; i++)
-                    {
-
-                        dictTestCell.Add(tbl.Rows[i].ItemArray[0].GetNoneIfEmptyOrNull(), i);
-                    }
-
-                    for (int i = 1; i < tbl.Columns.Count; i++)
-                    {
-                        var test = new JiraTestMasterDto()
+                        for (int i = 0; i < tbl.Rows.Count; i++)
                         {
-                            StepId = iStepId,
-                            Project = projectCode.GetNoneIfEmptyOrNull(),
-                            GroupKey = groupCode.GetNoneIfEmptyOrNull(),
-                            OrderId = i,
-                            IssueType = issueType.GetNoneIfEmptyOrNull(),
-                            Action = GetAction(tbl.Rows[dictTestCell["Button (Transition)"]].ItemArray[i].GetNoneIfEmptyOrNull()),
-                            ExpectedStatus = tbl.Rows[dictTestCell["Resulting Status"]].ItemArray[i].GetNoneIfEmptyOrNull(),
-                            Expectation = JiraTestStatusEnum.Passed.ToString(),
-                            Status = tbl.Rows[dictTestCell["Button (Transition)"]].ItemArray[i].GetNoneIfEmptyOrNull(),
-                            Scenario = tbl.Rows[dictTestCell["Scenario/Step"]].ItemArray[i].GetNoneIfEmptyOrNull()
-                        };
 
-                        PopulateRequiredFields(test);
+                            dictTestCell.Add(tbl.Rows[i].ItemArray[0].GetNoneIfEmptyOrNull(), i);
+                        }
 
-                        lstJiraMasterDto.Add(test);
-                        iStepId = iStepId + 1;
+                        for (int i = 1; i < tbl.Columns.Count; i++)
+                        {
+                            var test = new JiraTestMasterDto()
+                            {
+                                StepId = iStepId,
+                                Project = projectCode.GetNoneIfEmptyOrNull(),
+                                GroupKey = groupCode.GetNoneIfEmptyOrNull(),
+                                OrderId = i,
+                                IssueType = issueType.GetNoneIfEmptyOrNull(),
+                                Action = GetAction(tbl.Rows[dictTestCell["Button (Transition)"]].ItemArray[i].GetNoneIfEmptyOrNull()),
+                                ExpectedStatus = tbl.Rows[dictTestCell["Resulting Status"]].ItemArray[i].GetNoneIfEmptyOrNull(),
+                                Expectation = JiraTestStatusEnum.Passed.ToString(),
+                                Status = tbl.Rows[dictTestCell["Button (Transition)"]].ItemArray[i].GetNoneIfEmptyOrNull(),
+                                Scenario = tbl.Rows[dictTestCell["Scenario/Step"]].ItemArray[i].GetNoneIfEmptyOrNull()
+                            };
+
+                            PopulateRequiredFields(test);
+
+                            lstJiraMasterDto.Add(test);
+                            iStepId = iStepId + 1;
+                        }
                     }
                 }
             }
+
+            return lstJiraMasterDto;
+        }
+        catch (Exception e)
+        {
+           logger.LogError(e.Message);
+            throw;
         }
 
-        return lstJiraMasterDto;
+        
     }
 
 

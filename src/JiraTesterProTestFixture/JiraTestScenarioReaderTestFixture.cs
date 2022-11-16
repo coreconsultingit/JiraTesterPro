@@ -1,7 +1,9 @@
-﻿using JiraTesterProService;
+﻿using JiraTesterProData;
+using JiraTesterProService;
 using JiraTesterProService.JiraParser;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Reflection;
 
 namespace JiraTesterProTestFixture;
 
@@ -19,9 +21,18 @@ public class JiraTestScenarioReaderTestFixture: JiraTestFixtureBase
     [Test]
     public async Task Is_Able_ToReadExcelRules_And_GenerateFile()
     {
+        var filePath = @"..\..\..\..\..\docs\Jira BUG Matrix.xlsx";
         var jiraMasterDto =
-            await jiraTestScenarioReader.GetJiraMasterDtoFromMatrix(@"..\..\..\..\..\docs\Jira BUG Matrix.xlsx");
+            await jiraTestScenarioReader.GetJiraMasterDtoFromMatrix(filePath);
         Assert.That(jiraMasterDto.Count, Is.EqualTo(11));
+
+        var jiraFileConfigProvider = _serviceProvider.GetService<IJiraFileConfigProvider>();
+
+        jiraFileConfigProvider.InitializeConfig(new FileConfigDto()
+            {
+                MasterTestFile = filePath,
+                OutputJiraTestFilePath = new FileInfo(Assembly.GetExecutingAssembly().FullName??@"..\").DirectoryName
+            });
 
         var testResult = await testStartegyFactory.GetJiraTestStrategyResult(jiraMasterDto);
 

@@ -61,6 +61,15 @@ public class ScreenCaptureService : IScreenCaptureService
     {
         try
         {
+            var retryLoginCount = 0;
+            if (!loginsucessfull && retryLoginCount==0)
+            {
+                var loginsucessfull = await SetStartSession();
+                if (!loginsucessfull)
+                {
+                    throw new Exception("Unable to login");
+                }
+            }
             var screenshot =  await ScreenshotUrlAsync(inputDto);
             var dirInfo = new FileInfo(inputDto.FilePath).Directory;
             if (!dirInfo.Exists)
