@@ -58,69 +58,7 @@ namespace JiraTesterProTestFixture
                 }
             }
             
-            //
-            //var xmlDoc = JsonConvert.DeserializeXmlNode(JsonParsed, "Root");
-            //XmlNodeList titleNodes = xmlDoc.SelectNodes("//issuetypes/fields/customfield_10830");
-
-            //XmlSerializer serial = new XmlSerializer(typeof(Customfield));
-
-            //using (XmlNodeReader reader = new XmlNodeReader(titleNodes[0]))
-            //{
-            //    Customfield syso = (Customfield)serial.Deserialize(reader);
-            //}
-
-            //var xmldoc1 = XDocument.Parse("<?xml version=\"1.0\" encoding=\"utf-8\"?>"+titleNodes.ToString());
-
-            //for (int i = 0; i < titleNodes.Count; i++)
-            //{
-            //    foreach (XmlElement node in (XmlElement)titleNodes[i])
-            //    {
-            //        if (node.Name.Contains("custom"))
-            //        {
-            //            foreach (var child in node.ChildNodes)
-            //            {
-            //                var x = child;
-            //            }
-            //        }
-
-            //    }
-
-            //}
-
-
-
-            //var issuetypes = test.Document.XPathSelectElements("//@*[starts-with(local-name(),'custom')]");
-
-            //foreach (var node in issuetypes)
-            //{
-
-
-            //}
-            //var rssTitle = parsed["projects"][0]["issuetypes"].ToLookup(x => x.Path);
-            //foreach (var issuType  in rssTitle.Select(x=>x.Key))
-            //{
-            //    var parsedjson = rssTitle[issuType];
-            //    var node = parsedjson.ToLookup(x => x.Path);
-            //    {
-            //        foreach (var subissuType in node.Select(x => x.Key))
-            //        {
-            //            var parsedjson1 = node[subissuType];
-
-            //            foreach (var token in parsedjson1.Children())
-            //            {
-            //                //var tok = token.Select(x=>x.Properties())
-            //                //if(tok.Select(x=>x))
-
-            //                if (((Newtonsoft.Json.Linq.JProperty)token).Name.Contains("customfield"))
-            //                {
-            //                    var name = ((Newtonsoft.Json.Linq.JProperty)token).Name;
-            //                }
-            //            }
-            //        }
-            //    }
-
-
-            //}
+           
 
         }
 

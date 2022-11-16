@@ -21,18 +21,12 @@ public class JiraTestScenarioReaderTestFixture: JiraTestFixtureBase
     [Test]
     public async Task Is_Able_ToReadExcelRules_And_GenerateFile()
     {
-        var filePath = @"..\..\..\..\..\docs\Jira BUG Matrix.xlsx";
+        
         var jiraMasterDto =
-            await jiraTestScenarioReader.GetJiraMasterDtoFromMatrix(filePath);
+            await jiraTestScenarioReader.GetJiraMasterDtoFromMatrix(testFilePath);
         Assert.That(jiraMasterDto.Count, Is.EqualTo(11));
 
-        var jiraFileConfigProvider = _serviceProvider.GetService<IJiraFileConfigProvider>();
-
-        jiraFileConfigProvider.InitializeConfig(new FileConfigDto()
-            {
-                MasterTestFile = filePath,
-                OutputJiraTestFilePath = new FileInfo(Assembly.GetExecutingAssembly().FullName??@"..\").DirectoryName
-            });
+      
 
         var testResult = await testStartegyFactory.GetJiraTestStrategyResult(jiraMasterDto);
 
