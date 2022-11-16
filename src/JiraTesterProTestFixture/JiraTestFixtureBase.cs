@@ -8,6 +8,7 @@ using JiraTesterProData;
 using JiraTesterProService;
 using JiraTesterProService.JiraParser;
 using System.Reflection;
+using JiraTesterProService.ImageHandler;
 
 namespace JiraTesterProTestFixture
 {
@@ -30,5 +31,17 @@ namespace JiraTesterProTestFixture
                 OutputJiraTestFilePath = new FileInfo(Assembly.GetExecutingAssembly().FullName ?? @"..\").DirectoryName
             });
         }
+
+        [OneTimeTearDown]
+        public async Task BaseTearDown()
+        {
+            var screenCaptureService = _serviceProvider.GetService<IScreenCaptureService>();
+            if (screenCaptureService != null)
+            {
+                await screenCaptureService.CloseSession();
+            }
+
+        }
+
     }
 }

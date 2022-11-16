@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using JiraTesterProData.JiraMapper;
+using JiraTesterProService.ExcelHandler;
 
 namespace JiraTesterProService.JiraParser;
 
@@ -11,10 +12,12 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
     private IJiraCustomParser jiraCustomParser;
     private IDictionary<string, JiraRootobject> dictProjectWithJira = new Dictionary<string, JiraRootobject>();
     private IDictionary<string, JiraIssuetype> dictProjectWithIssueTypeJira = new Dictionary<string, JiraIssuetype>();
-    public JiraTestScenarioReader(ILogger<JiraTestScenarioReader> logger, IJiraCustomParser jiraCustomParser)
+    private IDataTableParser<ScreenTestDto> screenTestDataTableParser;
+    public JiraTestScenarioReader(ILogger<JiraTestScenarioReader> logger, IJiraCustomParser jiraCustomParser, IDataTableParser<ScreenTestDto> screenTestDataTableParser)
     {
         this.logger = logger;
         this.jiraCustomParser = jiraCustomParser;
+        this.screenTestDataTableParser = screenTestDataTableParser;
     }
 
     public async Task<IList<JiraTestMasterDto>> GetJiraMasterDtoFromMatrix(string path)
@@ -69,47 +72,8 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
                         }
 
                         var groupCode = worksheet.Cells[celladdress.Start.Row + 2, celladdress.Start.Column].Value;
-                        int iCounter = 1;
-                        //foreach (var firstRowCell in worksheet.Cells[celladdress.Start.Row + 2, 1, celladdress.Start.Row + 2, worksheet.Dimension.End.Column])
-                        //{
-                        //    var columnname = firstRowCell.Text.StandardiseColumnTableName();
-                        //    if (columnlist.Contains(columnname))
-                        //    {
-                        //        columnname += iCounter.ToString();
-                        //        iCounter += 1;
-                        //    }
-                        //    tbl.Columns.Add(columnname);
-                        //    columnlist.Add(columnname);
-                        //}
-                        var tbl = ReadTableContent(celladdress, worksheet, celladdress.Start.Row + 2);//ReadColum(worksheet, celladdress.Start.Row + 2);
-                        
 
-                        //for (int rowNum = celladdress.Start.Row + 3; rowNum <= worksheet.Dimension.End.Row; rowNum++)
-                        //{
-                        //    var endcolumn = worksheet.Dimension.End.Column;
-                        //    var wsRow = worksheet.Cells[rowNum, 1, rowNum, endcolumn];
-                        //    if (wsRow.All(c => c.Value == null))
-                        //    {
-                        //        break;
-                        //    }
-
-
-                        //    DataRow row = tbl.Rows.Add();
-                        //    foreach (var cell in wsRow)
-                        //    {
-                        //        try
-                        //        {
-                        //            row[cell.Start.Column - 1] = cell.Text;
-                        //        }
-                        //        catch (Exception e)
-                        //        {
-                        //            logger.LogError(e.Message + e.InnerException);
-
-                        //        }
-
-                        //    }
-                        //}
-
+                        var tbl = ReadTableContent(worksheet, celladdress.Start.Row + 2);
 
                         for (int i = 0; i < tbl.Rows.Count; i++)
                         {
@@ -135,12 +99,39 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
                             };
 
                             PopulateRequiredFields(test);
+                            //Read the Screenscenario
+                            var screenworksheetName = $"{issueType.GetNoneIfEmptyOrNull()} - {test.Status} Screen";
+                            var screenworksheet =
+                                workbook.Worksheets.FirstOrDefault(x => x.Name.EqualsWithIgnoreCase(screenworksheetName));
+                            if (screenworksheet == null)
+                            {
+                                logger.LogInformation($"No screen details found for this status {screenworksheetName}");
+                            }
+                            else
+                            {
+                                var screenTestTable = ReadTableContent(screenworksheet, 1);
+                                var parsedScreenTest =
+                                    screenTestDataTableParser.ConvertDataTableToList(screenTestTable, null);
+
+                                if (parsedScreenTest.lstValidationMessage.Any())
+                                {
+                                    logger.LogError(string.Join(", ",parsedScreenTest.lstValidationMessage));
+                                    throw new Exception($"{screenworksheetName} has invalid screentest format");
+                                }
+                                else
+                                {
+                                    test.ScreenTestDto = parsedScreenTest.lstItems;
+                                }
+
+
+                            }
 
                             lstJiraMasterDto.Add(test);
                             iStepId = iStepId + 1;
+
                         }
 
-                        //Read the Screenscenaruio
+                        
                     }
                 }
             }
@@ -164,6 +155,10 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
                      worksheet.Dimension.End.Column])
         {
             var columnname = firstRowCell.Text.StandardiseColumnTableName();
+            if (string.IsNullOrEmpty(columnname))
+            {
+                columnname = iCounter.ToString();
+            }
             if (columnlist.Contains(columnname))
             {
                 columnname += iCounter.ToString();
@@ -176,7 +171,7 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
 
         return tbl;
     }
-    private DataTable ReadTableContent(ExcelRangeBase celladdress, ExcelWorksheet worksheet, int startRow)
+    private DataTable ReadTableContent(ExcelWorksheet worksheet, int startRow)
     {
         var tbl = ReadColum(worksheet, startRow);
         for (int rowNum = startRow + 1; rowNum <= worksheet.Dimension.End.Row; rowNum++)
