@@ -39,7 +39,7 @@ public class JiraTestMasterDto
 
     public bool IsSubTask { get; set; }
 
-    public IList<ScreenTestDto> ScreenTestDto { get; set; }
+    public IList<ScreenTestDto>? ScreenTestDto { get; set; }
     public JiraFields JiraField { get; set; }
 
 }

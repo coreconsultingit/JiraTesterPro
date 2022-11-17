@@ -8,7 +8,7 @@ public class CustomIssueTypeResolver : DefaultContractResolver
     {
         string resolvedName = null;
         // var resolved = this.PropertyMappings.TryGetValue(propertyName, out resolvedName);
-        if (propertyName.Contains("customfield",StringComparison.OrdinalIgnoreCase))
+        if (propertyName.Contains("customfield", StringComparison.OrdinalIgnoreCase))
         {
             return "Customfield";
         }
@@ -51,6 +51,8 @@ public class JiraIssuetype
     public bool subtask { get; set; }
     public string expand { get; set; }
     public JiraFields fields { get; set; }
+
+    
 }
 
 public class JiraFields
@@ -58,11 +60,11 @@ public class JiraFields
     public JiraIssuetype1 issuetype { get; set; }
     public Summary summary { get; set; }
     public Components components { get; set; }
-    
-    
-   
+    public Assignee Assignee { get; set; }
+
+
     public IList<Customfield> Customfield { get; set; }
-    
+
 
     public JiraFields()
     {
@@ -136,7 +138,7 @@ public class Allowedvalue1
 }
 public class Customfield
 {
-   
+
     public bool required { get; set; }
 
     public CustomeFieldSchema schema { get; set; }
@@ -168,5 +170,32 @@ public class CustomFieldAllowedvalue
     public string value { get; set; }
     public string id { get; set; }
 }
+
+
+
+
+public class Assignee
+{
+    public bool required { get; set; }
+    public Assignee schema { get; set; }
+    public string name { get; set; }
+    public string fieldId { get; set; }
+    public string autoCompleteUrl { get; set; }
+    public bool hasDefaultValue { get; set; }
+    public string[] operations { get; set; }
+    public AssigneeDefaultvalue defaultValue { get; set; }
+}
+
+public class AssigneeSchema
+{
+    public string type { get; set; }
+    public string system { get; set; }
+}
+
+public class AssigneeDefaultvalue
+{
+    public string name { get; set; }
+}
+
 
 

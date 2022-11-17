@@ -45,6 +45,17 @@ public class JiraCreateIssueTestStrategyImpl : JiraTestStrategy
             var issueCreated = jiraClient.CreateIssue(jiraTestMasterDto.Project);
             await PopulateRequiredFields(jiraTestMasterDto);
 
+            var key = $"{jiraTestMasterDto.Project}_{jiraTestMasterDto.IssueType}";
+            if (dictProjectWithIssueTypeJira.ContainsKey(key))
+            {
+                await CheckFieldDefinition(issueCreated, jiraTestMasterDto, dictProjectWithIssueTypeJira[key]);
+            }
+            else
+            {
+                
+            }
+
+                
 
             issueCreated.Summary = jiraTestMasterDto.Summary;
             issueCreated.Type = type;

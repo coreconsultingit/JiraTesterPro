@@ -1,5 +1,6 @@
 ﻿using JiraTesterProData;
 using JiraTesterProData.Extensions;
+using JiraTesterProData.JiraMapper;
 using JiraTesterProService.ImageHandler;
 using JiraTesterProService.JiraParser;
 
@@ -85,6 +86,44 @@ namespace JiraTesterProService
         protected  void AssertExpectedStatus(Issue issue, JiraTestMasterDto jiraTestMasterDto, JiraTestResult jiraTestResult)
         {
             jiraTestResult.HasException = issue.Status.Name == jiraTestMasterDto.ExpectedStatus;
+        }
+
+        protected async Task<IList<string>> CheckFieldDefinition(Issue issue, JiraTestMasterDto jiraTestMasterDto,JiraIssuetype issuetype)
+        {
+            var lstFieldValidationMessage = new List<string>();
+            if (jiraTestMasterDto.ScreenTestDto != null)
+            {
+                foreach (var field in jiraTestMasterDto.ScreenTestDto)
+                {
+                    if (field.FieldName.EqualsWithIgnoreCase("components"))
+                    {
+                        var definedComponentType = issuetype.fields.components;
+                        if (definedComponentType.required != field.IsMandatory)
+                        {
+                            lstFieldValidationMessage.Add($"components mandatory field requirement do not match. Defined is {definedComponentType.required} Test case has {field.IsMandatory}");
+                        }
+                        //System field check
+                        //if(!field.SystemField.EqualsWithIgnoreCase())
+
+
+                    }
+                    else if (field.FieldName.EqualsWithIgnoreCase("assignee"))
+                    {
+                        var definedComponentType = issuetype.fields.Assignee;
+                        if (definedComponentType.required != field.IsMandatory)
+                        {
+                            lstFieldValidationMessage.Add($"components mandatory field requirement do not match. Defined is {definedComponentType.required} Test case has {field.IsMandatory}");
+                        }
+                        //System field check
+                        //if(!field.SystemField.EqualsWithIgnoreCase())
+
+
+                    }
+                    //if(issuetype.fields.)
+                }
+            }
+
+            return lstFieldValidationMessage;
         }
     }
 }
