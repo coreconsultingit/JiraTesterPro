@@ -24,7 +24,7 @@ public class JiraTestScenarioReaderTestFixture: JiraTestFixtureBase
         
         var jiraMasterDto =
             await jiraTestScenarioReader.GetJiraMasterDtoFromMatrix(testFilePath);
-        Assert.That(jiraMasterDto.Count, Is.EqualTo(11));
+        Assert.That(jiraMasterDto.Count, Is.EqualTo(102));
 
       
 
@@ -33,9 +33,9 @@ public class JiraTestScenarioReaderTestFixture: JiraTestFixtureBase
 
         var writer = _serviceProvider.GetService<IJiraTestResultWriter>();
 
-        var result = await writer.WriteTestResult(testResult);
+        var result = await writer.WriteTestResult(DateTime.Now, testResult);
 
-        Assert.IsTrue(result);
+        Assert.IsNotEmpty(result);
         
         
 

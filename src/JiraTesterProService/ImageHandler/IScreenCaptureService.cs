@@ -1,4 +1,5 @@
-﻿using PuppeteerSharp;
+﻿using JiraTesterProData.JiraMapper;
+using PuppeteerSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,5 +13,8 @@ namespace JiraTesterProService.ImageHandler
         Task<bool> CaptureScreenShot(ScreenShotInputDto inputDto);
         Task<bool> SetStartSession();
         Task CloseSession();
+
+        Task<IPage> GetPage();
     }
+
 }

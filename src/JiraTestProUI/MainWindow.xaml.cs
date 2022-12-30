@@ -55,9 +55,9 @@ namespace JiraTestProUI
                 var serviceCollection = new ServiceCollection();
                 
                 serviceCollection.AddWpfBlazorWebView();
-#if DEBUG
+
                 serviceCollection.AddBlazorWebViewDeveloperTools();
-#endif
+
                serviceCollection.RegisterDependency(new JiraTesterCommandLineOptions(){IsWeb = true});
                 serviceCollection.AddMudServices();
 

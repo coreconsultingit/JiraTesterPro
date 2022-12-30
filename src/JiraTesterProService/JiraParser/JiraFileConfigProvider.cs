@@ -10,6 +10,9 @@ namespace JiraTesterProService.JiraParser
     public interface IJiraFileConfigProvider
     {
         string OutputJiraTestFilePathWithMasterFile { get; }
+
+        (string outputfile, string zipfilepath) OutputJiraTestFilePathWithMasterFileByGroupKey(string key);
+
         string OutputJiraTestFilePathWithMaster { get; }
 
         void InitializeConfig(FileConfigDto fileConfigDto);
@@ -47,6 +50,21 @@ namespace JiraTesterProService.JiraParser
             return fileConfigDto;
         }
 
+
+        public (string outputfile, string zipfilepath) OutputJiraTestFilePathWithMasterFileByGroupKey(string key)
+        {
+            var masterfile = new FileInfo(OutputJiraTestFilePathWithMaster);
+            memoryCache.TryGetValue(CacheConst.FileConfig, out FileConfigDto fileConfigDto);
+            if (fileConfigDto == null)
+            {
+                logger.LogError("File Config not initialized");
+                throw new Exception("File Config not initialized");
+            }
+            var dir = new DirectoryInfo(fileConfigDto.OutputJiraTestFilePath);
+            return (System.IO.Path.Combine(dir.FullName, Path.GetFileNameWithoutExtension(masterfile.Name).StandardiseColumnTableName(), DateTime.Now.ToString("yyyyMMdd"), key, $"TestOutPut.html"),
+                System.IO.Path.Combine(dir.FullName, Path.GetFileNameWithoutExtension(masterfile.Name).StandardiseColumnTableName(), DateTime.Now.ToString("yyyyMMdd")));
+        }
+
         public string OutputJiraTestFilePathWithMaster
         {
             get
@@ -60,7 +78,7 @@ namespace JiraTesterProService.JiraParser
                 }
                 var masterfile = new FileInfo(fileConfigDto.MasterTestFile);
                 var dir = new DirectoryInfo(fileConfigDto.OutputJiraTestFilePath);
-                var fullpath = System.IO.Path.Combine(dir.FullName, Path.GetFileNameWithoutExtension(masterfile.Name));
+                var fullpath = System.IO.Path.Combine(dir.FullName, Path.GetFileNameWithoutExtension(masterfile.Name).StandardiseColumnTableName());
                 try
                 {
 
@@ -92,7 +110,7 @@ namespace JiraTesterProService.JiraParser
                     throw new Exception("File Config not initialized");
                 }
                 var dir = new DirectoryInfo(fileConfigDto.OutputJiraTestFilePath);
-                return System.IO.Path.Combine(dir.FullName, Path.GetFileNameWithoutExtension(masterfile.Name), DateTime.Now.ToString("yyyyMMdd"), $"TestOutPut.html");
+                return System.IO.Path.Combine(dir.FullName, Path.GetFileNameWithoutExtension(masterfile.Name).StandardiseColumnTableName(), DateTime.Now.ToString("yyyyMMdd"), $"TestOutPut.html");
 
 
             }

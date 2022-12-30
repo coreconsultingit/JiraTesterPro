@@ -10,12 +10,12 @@ namespace JiraTestProUI.Shared
     {
         protected List<string> DashBoardList { get; set; }
         
-        protected override async Task OnInitializedAsync()
+        protected override Task OnInitializedAsync()
         {
-           // var dashboards = await DashBoardDetailCacheProvider.GetDashboardDetail();
+            // var dashboards = await DashBoardDetailCacheProvider.GetDashboardDetail();
             //sourceApplications = await sourceApplicationService.GetSourceApllications();
             DashBoardList = new List<string>();
-
+            return Task.CompletedTask;
         }
     }
 }

@@ -5,7 +5,7 @@ namespace JiraTesterProService.ExcelHandler
 
     public interface IDataTableParser<T> where T : new()
     {
-        (IList<T> lstItems, IList<string> lstValidationMessage) ConvertDataTableToList(DataTable dt, Action<T>? act);
+        (IList<T> lstItems, IList<string> lstValidationMessage) ConvertDataTableToList(DataTable dt, Action<T> act);
     }
     public class DataTableParser<T> : IDataTableParser<T> where T : new()
     {
@@ -17,7 +17,7 @@ namespace JiraTesterProService.ExcelHandler
         }
 
 
-        public (IList<T> lstItems, IList<string> lstValidationMessage) ConvertDataTableToList(DataTable dt, Action<T>? act)
+        public (IList<T> lstItems, IList<string> lstValidationMessage) ConvertDataTableToList(DataTable dt, Action<T> act)
         {
             ValidationMessages = new List<string>();
 

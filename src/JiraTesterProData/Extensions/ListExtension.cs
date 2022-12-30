@@ -9,7 +9,7 @@ namespace JiraTesterProData.Extensions;
 public static class ListExtension
 {
    
-        public static IEnumerable<List<T>> SplitList<T>(List<T> locations, int nSize = 30)
+    public static IEnumerable<List<T>> SplitList<T>(List<T> locations, int nSize = 30)
         {
             for (int i = 0; i < locations.Count; i += nSize)
             {
@@ -103,42 +103,42 @@ public static class ListExtension
             return convertedInt;
         }
 
-        public static DataTable ToPivotTable<T, TColumn, TRow, TData>(
-            this IEnumerable<T> source,
-            Func<T, TColumn> columnSelector,
-            Expression<Func<T, TRow>> rowSelector,
-            Func<IEnumerable<T>, TData> dataSelector)
-        {
-            DataTable table = new DataTable();
-            var rowName = ((MemberExpression)rowSelector.Body).Member.Name;
-            table.Columns.Add(new DataColumn(rowName));
-            var columns = source.Select(columnSelector).Distinct();
+        //public static DataTable ToPivotTable<T, TColumn, TRow, TData>(
+        //    this IEnumerable<T> source,
+        //    Func<T, TColumn> columnSelector,
+        //    Expression<Func<T, TRow>> rowSelector,
+        //    Func<IEnumerable<T>, TData> dataSelector)
+        //{
+        //    DataTable table = new DataTable();
+        //    var rowName = ((MemberExpression)rowSelector.Body).Member.Name;
+        //    table.Columns.Add(new DataColumn(rowName));
+        //    var columns = source.Select(columnSelector).Distinct();
 
-            foreach (var column in columns)
-                table.Columns.Add(new DataColumn(column.ToString()));
+        //    foreach (var column in columns)
+        //        table.Columns.Add(new DataColumn(column.ToString()));
 
-            var rows = source.GroupBy(rowSelector.Compile())
-                .Select(rowGroup => new
-                {
-                    Key = rowGroup.Key,
-                    Values = columns.GroupJoin(
-                        rowGroup,
-                        c => c,
-                        r => columnSelector(r),
-                        (c, columnGroup) => dataSelector(columnGroup))
-                });
+        //    var rows = source.GroupBy(rowSelector.Compile())
+        //        .Select(rowGroup => new
+        //        {
+        //            Key = rowGroup.Key,
+        //            Values = columns.GroupJoin(
+        //                rowGroup,
+        //                c => c,
+        //                r => columnSelector(r),
+        //                (c, columnGroup) => dataSelector(columnGroup))
+        //        });
 
-            foreach (var row in rows)
-            {
-                var dataRow = table.NewRow();
-                var items = row.Values.Cast<object>().ToList();
-                items.Insert(0, row.Key);
-                dataRow.ItemArray = items.ToArray();
-                table.Rows.Add(dataRow);
-            }
+        //    foreach (var row in rows)
+        //    {
+        //        var dataRow = table.NewRow();
+        //        var items = row.Values.Cast<object>().ToList();
+        //        items.Insert(0, row.Key);
+        //        dataRow.ItemArray = items.ToArray();
+        //        table.Rows.Add(dataRow);
+        //    }
 
-            return table;
-        }
+        //    return table;
+        //}
 
         public static dynamic[] ToPivotArray<T, TColumn, TRow, TData>(
             this IEnumerable<T> source,
@@ -198,16 +198,25 @@ public static class ListExtension
             var set2 = new HashSet<T>(lst2);
             return set1.SetEquals(set2);
         }
-        public static bool IsListEqual(this IList<string> lst1, IList<string> lst2)
+        public static (bool isEqual,IList<string> sourceOnly, IList<string> destinationOnly) IsListEqual(this IList<string> lst1, IList<string> lst2)
         {
             if (lst1.Count != lst2.Count)
             {
-                return false;
+                return (false, lst1.Except(lst2).ToList(),lst2.Except(lst1).ToList());
             }
 
             var set1 = new HashSet<string>(lst1);
             var set2 = new HashSet<string>(lst2);
-            return set1.SetEquals(set2);
+            return (set1.SetEquals(set2), lst1.Except(lst2).ToList(), lst2.Except(lst1).ToList());
+        }
+        public static (bool isEqual, IList<string> missing) IsListEqualWithDestinationCheck(this IList<string> lst1, IList<string> lst2)
+        {
+
+            var set1 = new HashSet<string>(lst1);
+            var set2 = new HashSet<string>(lst2);
+            var anymissing = set2.Except(set1).ToList();
+
+            return (!anymissing.Any(), anymissing);
         }
 
-    }
+}

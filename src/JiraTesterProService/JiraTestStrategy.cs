@@ -1,8 +1,15 @@
-﻿using JiraTesterProData;
+﻿using System.Diagnostics;
+using JiraTesterProData;
 using JiraTesterProData.Extensions;
 using JiraTesterProData.JiraMapper;
 using JiraTesterProService.ImageHandler;
 using JiraTesterProService.JiraParser;
+using PuppeteerSharp.Input;
+using System.Linq;
+using System.Text.RegularExpressions;
+using PuppeteerSharp;
+using JiraTesterProService.BusinessExceptionHandler;
+using OfficeOpenXml.Drawing.Slicer.Style;
 
 namespace JiraTesterProService
 {
@@ -13,39 +20,44 @@ namespace JiraTesterProService
         protected  IJiraClientProvider jiraClientProvider;
         protected IScreenCaptureService screenCaptureService;
         protected IJiraFileConfigProvider jiraFileConfigProvider;
+        //protected Regex JiraRegEx = new Regex("[a-z,A-Z]+-[0-9]+", RegexOptions.Compiled);
+        protected int fieldDelayInterval;
+        protected ILogger<JiraTestStrategy> logger;
+        private IBusinessExceptionFactory businessExceptionFactory;
+        private IConfiguration configuration;
+        protected int clickDelay;
+        protected int taskStatusDelay;
+        protected IRetryHelper retryHelper;
         protected JiraTestStrategy(IJiraClientProvider jiraClientProvider,
             IJiraFileConfigProvider jiraFileConfigProvider, IScreenCaptureService screenCaptureService,
-            ILogger<JiraCreateIssueTestStrategyImpl> logger)
+            ILogger<JiraTestStrategy> logger, IBusinessExceptionFactory businessExceptionFactory, IConfiguration configuration, IRetryHelper retryHelper)
         {
             this.jiraClientProvider = jiraClientProvider;
             this.screenCaptureService = screenCaptureService;
             this.jiraFileConfigProvider = jiraFileConfigProvider;
+            this.logger = logger;
+            this.businessExceptionFactory = businessExceptionFactory;
+            this.clickDelay = configuration.GetValue<int?>("ClickDelay")??200;
+            this.fieldDelayInterval = configuration.GetValue<int?>("FieldDelayInterval") ?? 500;
+            this.taskStatusDelay = configuration.GetValue<int?>("TaskStatusInterval") ?? 20000;
+            this.retryHelper = retryHelper;
         }
 
-        protected async Task InitializeDictionary(JiraTestMasterDto jiraTestMasterDto, JiraTestResult jiraTestResult)
-        {
-            Project projectDetails;
-            if (!dictProject.ContainsKey(jiraTestMasterDto.Project))
-            {
-                projectDetails = await jiraClientProvider.GetJiraClient().Projects.GetProjectAsync(jiraTestMasterDto.Project);
-                dictProject.Add(jiraTestMasterDto.Project, projectDetails);
-               
-                if (!dictIssueType.ContainsKey(jiraTestMasterDto.Project))
-                {
-                    dictIssueType.Add(jiraTestMasterDto.Project, await dictProject[jiraTestMasterDto.Project].GetIssueTypesAsync());
-                }
-            }
-            jiraTestResult.ProjectName = dictProject[jiraTestMasterDto.Project].Name;
-        }
        
+        protected JiraTestResult GetInitializedJiraTestResult(JiraTestMasterDto jiraTestMasterDto)
+        {
+            return new JiraTestResult()
+            {
+                JiraTestMasterDto = jiraTestMasterDto,
+                ProjectName = jiraTestMasterDto.ProjectName, TestPassed = false
 
-
-
+            };
+        }
         protected async Task TakeScreenShotAfterAction(JiraTestResult result)
         {
             var imagePath = Path.Combine(jiraFileConfigProvider.OutputJiraTestFilePathWithMaster, DateTime.Now.ToString("yyyyMMdd"), result.JiraTestMasterDto.GroupKey,
                 $"{result.JiraTestMasterDto.StepId}_{result.JiraTestMasterDto.Project}_{result.JiraTestMasterDto.Scenario}.png");
-            
+            logger.LogInformation($"Taking screenshot for  url {result.JiraIssueUrl} path {imagePath}");
             await screenCaptureService.CaptureScreenShot(new ScreenShotInputDto()
             {
                 FilePath = imagePath,
@@ -55,21 +67,51 @@ namespace JiraTesterProService
 
         }
 
+        protected async Task<string> TakeScreenShotBeforeAction(JiraTestMasterDto dto, IPage page,string screenshotpart="")
+        {
+            var imagePath = Path.Combine(jiraFileConfigProvider.OutputJiraTestFilePathWithMaster, DateTime.Now.ToString("yyyyMMdd"), dto.GroupKey,
+                $"{dto.StepId}_{dto.Project}_{dto.Scenario}_{dto.Action}_Screen{screenshotpart}.png");
+
+            var bodyWidth = await page.EvaluateExpressionAsync<int>("document.body.scrollWidth");
+            var bodyHeight = await page.EvaluateExpressionAsync<int>("document.body.scrollHeight");
+            
+            await page.SetViewportAsync(new ViewPortOptions()
+            {
+                Height = bodyHeight,
+                Width = bodyWidth
+
+            });
+            var bytes = await page.ScreenshotDataAsync(new ScreenshotOptions()
+            {
+                FullPage = true
+            });
+            //logger.LogInformation($"Taking screenshot for  url {result.JiraIssueUrl} path {imagePath}");
+            await screenCaptureService.CaptureScreenShot(new ScreenShotInputDto()
+            {
+                FilePath = imagePath,ScreenShot = bytes
+
+            });
+            return imagePath;
+
+        }
+
         public abstract Task<JiraTestResult> Execute(JiraTestMasterDto jiraTestMasterDto);
 
         protected async Task AssertSubTaskCount(Issue issue, JiraTestMasterDto jiraTestMasterDto)
         {
-            if (jiraTestMasterDto.ExpectedSubTaskCount.HasValue && jiraTestMasterDto.ExpectedSubTaskCount.Value > 0)
+            if (jiraTestMasterDto.ExpectedSubTaskCount > 0)
             {
                 var subTasks = await issue.GetSubTasksAsync();
-                if (subTasks.TotalItems != jiraTestMasterDto.ExpectedSubTaskCount.Value)
+                if (subTasks.TotalItems != jiraTestMasterDto.ExpectedSubTaskCount)
                 {
                     throw new Exception("Sub task count doesn't match");
                 }
 
                 if (!string.IsNullOrEmpty(jiraTestMasterDto.ExpectedSubTaskList))
                 {
-                    if (!subTasks.Select(x => x.Summary).ToList().IsListEqual(jiraTestMasterDto.ExpectedSubTaskList.Split(",")))
+                    var listCompared = subTasks.Select(x => x.Summary).ToList()
+                        .IsListEqual(jiraTestMasterDto.ExpectedSubTaskList.Split(","));
+                    if (!listCompared.isEqual)
                     {
                         throw new Exception("Sub task created summary doesn't match");
                     }
@@ -81,49 +123,98 @@ namespace JiraTesterProService
 
         protected void SetJiraIssueUrl(JiraTestResult jiraTestResult,string jiraurl)
         {
-            jiraTestResult.JiraIssueUrl = $"{jiraurl}browse/{jiraTestResult.JiraIssue.Key}";
+            if (jiraTestResult.JiraIssue!=null)
+            {
+                jiraTestResult.JiraIssueUrl = $"{jiraurl}browse/{jiraTestResult.JiraIssue.Key}";
+            }
+            else
+            {
+                businessExceptionFactory.AddBusinessException(new BusinessException(SeverityType.Critical,"No issue key found",jiraTestResult.JiraTestMasterDto,TestType.WorkFlow));
+            }
+           
         }
         protected  void AssertExpectedStatus(Issue issue, JiraTestMasterDto jiraTestMasterDto, JiraTestResult jiraTestResult)
         {
-            jiraTestResult.HasException = issue.Status.Name == jiraTestMasterDto.ExpectedStatus;
+            jiraTestResult.TestPassed = issue?.Status.Name == jiraTestMasterDto.ExpectedStatus;
+            jiraTestResult.HasException = !jiraTestResult.TestPassed;
         }
 
-        protected async Task<IList<string>> CheckFieldDefinition(Issue issue, JiraTestMasterDto jiraTestMasterDto,JiraIssuetype issuetype)
+       
+
+        protected async Task<string> GetCreatedOrUpdatedJira(IPage page,JiraTestMasterDto dto, JiraActionEnum action)
         {
-            var lstFieldValidationMessage = new List<string>();
-            if (jiraTestMasterDto.ScreenTestDto != null)
+            try
             {
-                foreach (var field in jiraTestMasterDto.ScreenTestDto)
+                logger.LogInformation($"Sleeping for {taskStatusDelay} millliseconds before proceeding for {dto.GroupKey} {dto.Status} check");
+                await Task.Delay(taskStatusDelay);
+
+                if (action.Equals(JiraActionEnum.Create))   
                 {
-                    if (field.FieldName.EqualsWithIgnoreCase("components"))
-                    {
-                        var definedComponentType = issuetype.fields.components;
-                        if (definedComponentType.required != field.IsMandatory)
+                    
+                    var jql = $"project = {dto.Project} AND summary ~ \"{dto.UniqueKey}\"";
+                    
+                    logger.LogInformation($"Executing the jql {jql}");                  
+
+                        var createdJira = await jiraClientProvider.GetJiraClient().Issues.GetIssuesFromJqlAsync(jql, 5, 0);
+
+                        if (createdJira != null && createdJira.TotalItems != 0)
                         {
-                            lstFieldValidationMessage.Add($"components mandatory field requirement do not match. Defined is {definedComponentType.required} Test case has {field.IsMandatory}");
+
+                            var jirakey = createdJira.OrderByDescending(x => x.Created).First().Key.Value;
+
+                            logger.LogInformation($"Successfully {action.ToString()} {jirakey}");
+                            return jirakey;
+
                         }
-                        //System field check
-                        //if(!field.SystemField.EqualsWithIgnoreCase())
+                        throw new Exception($"No Jira found for group key {dto.UniqueKey}");
+                    
+                    
 
-
-                    }
-                    else if (field.FieldName.EqualsWithIgnoreCase("assignee"))
-                    {
-                        var definedComponentType = issuetype.fields.Assignee;
-                        if (definedComponentType.required != field.IsMandatory)
-                        {
-                            lstFieldValidationMessage.Add($"components mandatory field requirement do not match. Defined is {definedComponentType.required} Test case has {field.IsMandatory}");
-                        }
-                        //System field check
-                        //if(!field.SystemField.EqualsWithIgnoreCase())
-
-
-                    }
-                    //if(issuetype.fields.)
                 }
-            }
+                else
+                {
+                    await page.WaitForTimeoutAsync(fieldDelayInterval);
+                    return dto.IssueKey;
+                }
+              
+               
+             
 
-            return lstFieldValidationMessage;
+            }
+            catch (PuppeteerException e)
+            {
+                logger.LogError(e.Message);
+                await LogError(page, dto);
+                throw;
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e.Message);
+                await LogError(page, dto);
+                throw;
+
+            }            
+        }
+        protected async Task LogError(IPage page, JiraTestMasterDto dto)
+        {
+            var errorhandler = await page.QuerySelectorAllAsync(".error");
+            if (errorhandler != null && errorhandler.Any())
+            {
+                foreach (var handler in errorhandler)
+                {
+                    try
+                    {
+                        var error = await page.EvaluateFunctionAsync<string>("el => el.innerText", handler);
+                        businessExceptionFactory.AddBusinessException(new BusinessException(SeverityType.Error, error, dto, TestType.WorkFlow));
+                    }
+                    catch (Exception ex)
+                    {
+                        businessExceptionFactory.AddBusinessException(new BusinessException(SeverityType.Error, ex.Message, dto, TestType.WorkFlow));
+                    }
+
+                }
+
+            }
         }
     }
 }

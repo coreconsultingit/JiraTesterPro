@@ -3,10 +3,11 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net6.0-windows</TargetFramework>
-	  <PublishSingleFile>true</PublishSingleFile>
 	  
+	  <EnableWindowsTargeting>true</EnableWindowsTargeting>
+	  <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
 	  <Nullable>disable</Nullable>
-    <UseWPF>true</UseWPF>
+		<UseWPF>true</UseWPF>
 	  <ApplicationIcon>Resources\AppIcon\ClarioIcon.ico</ApplicationIcon>
   </PropertyGroup>
 	<ItemGroup>
@@ -16,6 +17,7 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <PackageReference Include="Blazor-ApexCharts" Version="0.9.15-beta" />
+	  <PackageReference Include="BlazorDownloadFile" Version="2.4.0.2" />
 	  <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Wpf" Version="6.0.547" />
 	  <PackageReference Include="MudBlazor" Version="6.0.18" />
 	  <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
@@ -31,7 +33,15 @@
 	  <Content Update="appSettings.json">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </Content>
+	  <Content Update="wwwroot\UserManual.docx">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
 	</ItemGroup>
 
-
+<ItemGroup>
+  <KnownRuntimePack Update="@(KnownRuntimePack)">
+    <LatestRuntimeFrameworkVersion Condition="'%(TargetFramework)' == 'TARGETFRAMEWORK'">EXISTINGVERSION</LatestRuntimeFrameworkVersion>
+  </KnownRuntimePack> 
+</ItemGroup>
 </Project>
+

@@ -1,0 +1,145 @@
+﻿<#@ template debug="true" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".html" #>
+<!DOCTYPE html><html languate="en">
+<#=Model.Header#>
+<body>
+<div class="container-fluid">
+<#=Model.HeaderSection#>
+
+<#foreach(var testresult in Model.TestResult){#>
+<div class="row">
+<div class="col-sm border rounded">
+<div class="table-responsive">
+<table class="table table-hover"><caption><#=testresult.Key#> </caption>
+<thead class="thead-light">
+<tr>
+<th>StepId</th>
+<th>Project</th>
+<th>IssueType</th>
+<th>ExecutedScenario</th>
+<th>Create/Update</th>
+<th>Action</th>
+<th>Expected Status</th>
+<th>Actual Status</th>
+<th>WorkFlow Pass/Fail</th>
+<th>ScreenTest Pass/Fail</th>
+<th>WorkFlow Screen Value Pass/Fail</th>
+<th>IssueKey</th>
+
+<th>ScreenShots</th>
+
+<th>Comments</th>
+</tr> 
+</thead>
+<tbody>
+<#foreach(var result in Model.TestResult[testresult.Key]){
+if (result.TestPassed){#>
+<tr class="table-success">
+<#}#>
+<#else{#>
+<tr class="table-danger">
+<#}#>
+<td><#=result.JiraTestMasterDto.StepId#></td>
+<td><#=result.ProjectName.GetEmptyIfEmptyOrNull()#></td>
+<td><#=result.JiraTestMasterDto?.IssueType.GetEmptyIfEmptyOrNull()#></td>
+
+
+<td>
+<#if (!string.IsNullOrEmpty(result.InputScreenFileName)){#>
+<#if (Model.IsIndividual){#>
+<a href="<#=result.InputScreenFileName#>"><#=result.JiraTestMasterDto?.Scenario.GetEmptyIfEmptyOrNull()#></a>
+<#}else {#>
+<a href="<#=testresult.Key#>/<#=result.InputScreenFileName#>"><#=result.JiraTestMasterDto?.Scenario.GetEmptyIfEmptyOrNull()#></a>
+<#}} else{#>
+<#=result.JiraTestMasterDto?.Scenario.GetEmptyIfEmptyOrNull()#>
+<#}#>
+</td>
+
+
+
+
+<td><#=result.JiraTestMasterDto?.Action.GetEmptyIfEmptyOrNull()#></td>
+<td><#=result.JiraTestMasterDto?.Status.GetEmptyIfEmptyOrNull()#></td>
+<td><#=result.JiraTestMasterDto?.ExpectedStatus.GetEmptyIfEmptyOrNull()#></td>
+
+<td>
+	
+	<#=JiraOutPutExtension.GetJiraStatus(result)#>
+</td>
+
+<td>
+<#=result.TestStatus.GetEmptyIfEmptyOrNull()#>
+</td>
+
+<#if (result.FailedScreenTestResultStatus){#>
+<td><span class="badge bg-danger">
+<#}#>
+<#else{#>
+<td><span>
+<#}#>
+<#if (Model.IsIndividual){#>
+<a href="ScreenTestResult.html" 
+<#if(result.FailedScreenTestResultStatus){#>
+class="text-white"
+<#}#>
+><#=result.ScreenTestStatus.GetEmptyIfEmptyOrNull()#></a>
+<#}else {#>
+<a href="<#=testresult.Key#>/ScreenTestResult.html"
+<#if(result.FailedScreenTestResultStatus){#>
+class="text-white"
+<#}#>
+><#=result.ScreenTestStatus.GetEmptyIfEmptyOrNull()#></a>
+<#}#>
+</span>
+</td>
+
+
+
+<td>
+<#=JiraOutPutExtension.GetInValidValue(result)#>
+</td>
+<td>
+<#if (result.JiraIssue!=null){#>
+<a href="<#=result.JiraIssueUrl.GetEmptyIfEmptyOrNull()#>"><#=result.JiraIssue.Key#></a>
+<#}#>
+</td>
+
+<td>
+<#if (result.ScreenShotPath!=null){#>
+<#if (Model.IsIndividual){#>
+<a href="<#=result.ScreenShotFileName#>"><#=result.ScreenShotFileName#></a>
+<#}else {#>
+<a href="<#=testresult.Key#>/<#=result.ScreenShotFileName#>"><#=result.ScreenShotFileName#></a>
+<#}}#>
+</td>
+
+
+
+
+<td>
+<#=result.Comment.GetEmptyIfEmptyOrNull()#>
+</td>
+<#}#>
+
+
+</tr>
+
+</tbody>
+
+</table>
+</div>
+</div>
+</div>
+
+
+
+</div>
+
+<#}#>
+
+</div>
+</body></html>

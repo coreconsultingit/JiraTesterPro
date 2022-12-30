@@ -1,4 +1,5 @@
-﻿using JiraTesterProService.ExcelHandler;
+﻿using JiraTesterProService.BusinessExceptionHandler;
+using JiraTesterProService.ExcelHandler;
 using JiraTesterProService.FileHandler;
 using JiraTesterProService.JiraParser;
 using Serilog;
@@ -13,7 +14,9 @@ public class JiraTestWorkflowRunner : IJiraTestWorkflowRunner
     private IJiraTestStartegyFactory jiraTestStartegyFactory;
     private IJiraTestResultWriter jiraTestResultWriter;
     private IJiraFileConfigProvider jiraFileConfigProvider;
-    public JiraTestWorkflowRunner(IJiraTestScenarioReader jiraTestScenarioReader, IFileFactory fileFactory, IDataTableParser<JiraTestMasterDto> jiraTestMasterParser, IJiraTestStartegyFactory jiraTestStartegyFactory, IJiraTestResultWriter jiraTestResultWriter, IJiraFileConfigProvider jiraFileConfigProvider)
+    private IJiraRefProvider jiraRefProvider;
+    private IBusinessExceptionFactory businessExceptionFactory;
+    public JiraTestWorkflowRunner(IJiraTestScenarioReader jiraTestScenarioReader, IFileFactory fileFactory, IDataTableParser<JiraTestMasterDto> jiraTestMasterParser, IJiraTestStartegyFactory jiraTestStartegyFactory, IJiraTestResultWriter jiraTestResultWriter, IJiraFileConfigProvider jiraFileConfigProvider, IJiraRefProvider jiraRefProvider, IBusinessExceptionFactory buisExceptionFactory)
     {
         this.jiraTestScenarioReader = jiraTestScenarioReader;
         this.fileFactory = fileFactory;
@@ -21,12 +24,18 @@ public class JiraTestWorkflowRunner : IJiraTestWorkflowRunner
         this.jiraTestStartegyFactory = jiraTestStartegyFactory;
         this.jiraTestResultWriter = jiraTestResultWriter;
         this.jiraFileConfigProvider = jiraFileConfigProvider;
+        this.jiraRefProvider = jiraRefProvider;
+        this.businessExceptionFactory = buisExceptionFactory;
     }
 
-    public async Task<IList<JiraTestResult>> RunJiraWorkflow()
+    public async Task<JiraWorkFlowResult> RunJiraWorkflow()
     {
         var dto = jiraFileConfigProvider.GetFileConfigDto();
         IList<JiraTestMasterDto> lstJiraTestItems = new List<JiraTestMasterDto>();
+
+        jiraRefProvider.Clear();
+        businessExceptionFactory.ClearException();
+        DateTime startTime = DateTime.Now;
         if (dto.MasterTestFile == null)
         {
             var testFileData =
@@ -52,8 +61,15 @@ public class JiraTestWorkflowRunner : IJiraTestWorkflowRunner
 
         var testResult = await jiraTestStartegyFactory.GetJiraTestStrategyResult(lstJiraTestItems);
 
-        await jiraTestResultWriter.WriteTestResult(testResult);
+        var fileResult = await jiraTestResultWriter.WriteTestResult(startTime,testResult);
 
-        return testResult;
+        return new JiraWorkFlowResult()
+        {
+            IsSuccessfull = true,
+            JiraTestResultWriterResult = fileResult,
+            Results = testResult
+        };
     }
+
+
 }

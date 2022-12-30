@@ -1,0 +1,66 @@
+﻿<#@ template debug="true" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".html" #>
+<!DOCTYPE html><html languate="en">
+<#=Model.Header#>
+
+<body>
+<div class="container-fluid">
+
+<#foreach(var testresult in Model.TestResult){#>
+<div class="row">
+<div class="col-sm border rounded">
+<div class="table-responsive">
+<table class="table table-hover"><caption><#=testresult.Key#>  </caption>
+<thead class="thead-light">
+<tr>
+<th>IssueKey</th>
+<th>Severity</th>
+<th>Message</th>
+<th>TestType</th>
+</tr> 
+</thead>
+<tbody>
+<#foreach(var result in Model.TestResult[testresult.Key]){
+if (result.Severity.Equals(SeverityType.Information)){#>
+<tr class="table-success">
+<#}#>
+<#else if (result.Severity.Equals(SeverityType.Warning)){#>
+<tr class="table-secondary">
+<#}#>
+<#else{#>
+<tr class="table-danger">
+<#}#>
+<td>
+
+<a href="<#=result.JiraMaster.IssueKey.GetEmptyIfEmptyOrNull()#>"><#=result.JiraMaster.IssueKey.GetEmptyIfEmptyOrNull()#></a>
+
+</td>
+<td><#=result.Severity.GetEmptyIfEmptyOrNull()#></td>
+<td>
+<#foreach(var message in result.Message.Split(Environment.NewLine)){#>
+<pre><#=message#></pre>
+<#}#>
+</td>
+<td><#=result.TestType.GetEmptyIfEmptyOrNull()#></td>
+
+<#}#>
+</tr>
+</tbody>
+
+</table>
+</div>
+</div>
+</div>
+
+
+
+
+
+<#}#>
+
+</div>
+</body></html>

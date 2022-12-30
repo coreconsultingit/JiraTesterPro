@@ -1,8 +1,11 @@
-﻿using JiraTesterProData.Extensions;
+﻿using System.Diagnostics;
+using JiraTesterProData.Extensions;
 using System.IO;
 using System.Text;
 using JiraTesterProData.JiraMapper;
 using JiraTesterProService.ExcelHandler;
+using Exception = System.Exception;
+using System;
 
 namespace JiraTesterProService.JiraParser;
 
@@ -11,6 +14,15 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
     private ILogger<JiraTestScenarioReader> logger;
     
     private IDataTableParser<ScreenTestDto> screenTestDataTableParser;
+
+    private IList<string> lstKeyDictionaryValue = new List<string>()
+    {
+        "Button (Transition)", "Resulting Status", "Scenario/Step"
+    };
+
+    private HashSet<string> ScreenTestList = new HashSet<string>();
+    private HashSet<Guid> UniqueTestList = new HashSet<Guid>();
+    private HashSet<string> GroupKeyList = new HashSet<string>();
     public JiraTestScenarioReader(ILogger<JiraTestScenarioReader> logger, IDataTableParser<ScreenTestDto> screenTestDataTableParser)
     {
         this.logger = logger;
@@ -18,7 +30,7 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
         this.screenTestDataTableParser = screenTestDataTableParser;
     }
 
-    public async Task<IList<JiraTestMasterDto>> GetJiraMasterDtoFromMatrix(string path)
+    public Task<IList<JiraTestMasterDto>> GetJiraMasterDtoFromMatrix(string path)
     {
 
 
@@ -29,9 +41,15 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
             using (var package = new ExcelPackage(fi.Open(FileMode.Open)))
             {
                 var workbook = package.Workbook;
+                var workbookName = fi.Name.Replace(" ", "").Replace(".", "");
+                if (workbookName.Length > 50)
+                {
+                    workbookName = workbookName.Substring(0, 49);
+                }
 
-                int iStepId = 0;
-                foreach (var worksheet in workbook.Worksheets.Where(x => x.Name.ContainsWithIgnoreCase("WorkFlow")))
+                int iStepId = 1;
+                int iGroupKey = 0;
+                foreach (var worksheet in workbook.Worksheets.Where(x => !x.Name.ContainsWithIgnoreCase("Screen")))
                 {
                     int rowStart = worksheet.Dimension.Start.Row;
                     int rowEnd = worksheet.Dimension.End.Row;
@@ -40,96 +58,149 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
                                      where cell.Value.GetNoneIfEmptyOrNull().EqualsWithIgnoreCase("ProjectCode")
                                      select cell;
 
-
-                    foreach (var celladdress in searchCell)
+                   try
                     {
-
-                        var dictTestCell = new Dictionary<string, int>();
-                        
-
-                        var projectCode = worksheet.Cells[celladdress.Start.Row, celladdress.Start.Column + 1].Value;
-
-                        if (projectCode == null)
-                        {
-                            logger.LogError($"No project code found at row {celladdress.Start.Row} column {celladdress.Start.Column + 1}");
-                        }
-
-                        var issueType = worksheet.Cells[celladdress.Start.Row + 1, celladdress.Start.Column + 1].Value;
-
-                        if (issueType == null)
-                        {
-                            logger.LogError($"No issue type found at row {celladdress.Start.Row + 1} column {celladdress.Start.Column + 1}");
-                        }
-
-
-                       
-
-                        var groupCode = worksheet.Cells[celladdress.Start.Row + 2, celladdress.Start.Column].Value;
-
-                        var tbl = ReadTableContent(worksheet, celladdress.Start.Row + 2);
-
-                        for (int i = 0; i < tbl.Rows.Count; i++)
+                        foreach (var celladdress in searchCell)
                         {
 
-                            dictTestCell.Add(tbl.Rows[i].ItemArray[0].GetNoneIfEmptyOrNull(), i);
-                        }
+                            var dictTestCell = new Dictionary<string, int>();
 
-                        for (int i = 1; i < tbl.Columns.Count; i++)
-                        {
-                            var test = new JiraTestMasterDto()
+
+                            var projectCode = worksheet.Cells[celladdress.Start.Row, celladdress.Start.Column + 1].Value;
+
+                            if (projectCode == null)
                             {
-                                StepId = iStepId,
-                                Project = projectCode.GetNoneIfEmptyOrNull(),
-                                GroupKey = groupCode.GetNoneIfEmptyOrNull(),
-                                OrderId = i,
-                                IssueType = issueType.GetNoneIfEmptyOrNull(),
-                                Action = GetAction(tbl.Rows[dictTestCell["Button (Transition)"]].ItemArray[i].GetNoneIfEmptyOrNull()),
-                                ExpectedStatus = tbl.Rows[dictTestCell["Resulting Status"]].ItemArray[i].GetNoneIfEmptyOrNull(),
-                                Expectation = JiraTestStatusEnum.Passed.ToString(),
-                                Status = tbl.Rows[dictTestCell["Button (Transition)"]].ItemArray[i].GetNoneIfEmptyOrNull(),
-                                Scenario = tbl.Rows[dictTestCell["Scenario/Step"]].ItemArray[i].GetNoneIfEmptyOrNull(),
-                                FileName = $"{fi.Name}_{worksheet.Name}"
-                            };
+                                logger.LogError($"No project code found at row {celladdress.Start.Row} column {celladdress.Start.Column + 1}");
+                            }
 
-                           // PopulateRequiredFields(test);
-                            //Read the Screenscenario
-                            var screenworksheetName = $"{issueType.GetNoneIfEmptyOrNull()} - {test.Status} Screen";
-                            var screenworksheet =
-                                workbook.Worksheets.FirstOrDefault(x => x.Name.EqualsWithIgnoreCase(screenworksheetName));
-                            if (screenworksheet == null)
+                            var issueType = worksheet.Cells[celladdress.Start.Row + 1, celladdress.Start.Column + 1].Value;
+
+                            if (issueType == null)
                             {
-                                logger.LogInformation($"No screen details found for this status {screenworksheetName}");
+                                logger.LogError($"No issue type found at row {celladdress.Start.Row + 1} column {celladdress.Start.Column + 1}");
+                            }
+
+                            
+                            var groupCode = worksheet.Cells[celladdress.Start.Row + 2, celladdress.Start.Column].Value;
+                            if (GroupKeyList.Contains(groupCode))
+                            {
+                                groupCode = $"{groupCode}_{iGroupKey}";
+                                iGroupKey += 1;
+                            }
+                            
+                            var uniqueKey = DateTime.Now.GenerateGuid(groupCode.ToString());
+                           
+                            
+                            if (!UniqueTestList.Contains(uniqueKey))
+                            {
+                                UniqueTestList.Add(uniqueKey);
+
                             }
                             else
                             {
-                                var screenTestTable = ReadTableContent(screenworksheet, 1);
-                                var parsedScreenTest =
-                                    screenTestDataTableParser.ConvertDataTableToList(screenTestTable, null);
+                                uniqueKey = DateTime.Now.GenerateGuid(groupCode.ToString() + "dupe");
+                                UniqueTestList.Add(uniqueKey);
+                            }
+                            logger.LogInformation($"Started to created the test for group key {groupCode}");
 
-                                if (parsedScreenTest.lstValidationMessage.Any())
-                                {
-                                    logger.LogError(string.Join(", ",parsedScreenTest.lstValidationMessage));
-                                    throw new Exception($"{screenworksheetName} has invalid screentest format");
-                                }
-                                else
-                                {
-                                    test.ScreenTestDto = parsedScreenTest.lstItems;
-                                }
+                            var tbl = ReadTableContent(worksheet, celladdress.Start.Row + 2);
 
+                            for (int i = 0; i < tbl.Rows.Count; i++)
+                            {
 
+                                dictTestCell.Add(tbl.Rows[i].ItemArray[0].GetNoneIfEmptyOrNull(), i);
                             }
 
-                            lstJiraMasterDto.Add(test);
-                            iStepId = iStepId + 1;
+                            for (int i = 1; i < tbl.Columns.Count; i++)
+                            {
 
+                                try
+                                {
+                                    var suppliedValue = GetSuppliedValues(i, tbl);
+                                    if (!suppliedValue.Any())
+                                    {
+                                        continue;
+                                    }
+
+                                    var missingKeys = lstKeyDictionaryValue.Except(suppliedValue.Keys);
+                                    if (missingKeys.Any())
+                                    {
+                                        logger.LogError($"Missing key values {string.Join(", ", missingKeys)}");
+                                        throw new InvalidDataException();
+                                    }
+                                    var test = new JiraTestMasterDto()
+                                    {
+                                        StepId = iStepId,
+                                        Project = projectCode.GetNoneIfEmptyOrNull().Replace("\n", "").Trim(),
+                                        GroupKey = groupCode.GetNoneIfEmptyOrNull().Trim(),
+                                        OrderId = i,
+                                        IssueType = issueType.GetNoneIfEmptyOrNull().Replace("\n", "").Trim(),
+                                        Action = GetAction(suppliedValue["Button (Transition)"]),
+                                        ExpectedStatus = suppliedValue["Resulting Status"],
+                                        Expectation = JiraTestStatusConst.Passed.ToString(),
+                                        Status = suppliedValue["Button (Transition)"],
+                                        Scenario = suppliedValue["Scenario/Step"],
+                                        FileName = $"{workbookName}_{worksheet.Name.Replace(" ","").Replace(".","")}",
+                                        SuppliedValues = suppliedValue,
+                                        UniqueKey = uniqueKey.ToString()
+
+                                    };
+
+                                    // PopulateRequiredFields(test);
+                                    //Read the Screenscenario
+                                    var screenworksheetName = $"{issueType.GetNoneIfEmptyOrNull()} - {test.Status} Screen";
+                                    var screenworksheet =
+                                        workbook.Worksheets.FirstOrDefault(x => x.Name.EqualsWithIgnoreCase(screenworksheetName));
+                                    if (screenworksheet == null)
+                                    {
+                                        logger.LogInformation($"No screen details found for this status {screenworksheetName}");
+                                    }
+                                    else if (ScreenTestList.Contains(screenworksheetName))
+                                    {
+                                        logger.LogInformation($"{screenworksheetName} has already been attached to the previous test case");
+                                    }
+                                    else
+                                    {
+                                        var screenTestTable = ReadTableContent(screenworksheet, 1);
+                                        var parsedScreenTest =
+                                            screenTestDataTableParser.ConvertDataTableToList(screenTestTable, null);
+
+                                        if (parsedScreenTest.lstValidationMessage.Any())
+                                        {
+                                            logger.LogError(string.Join(", ", parsedScreenTest.lstValidationMessage));
+                                            throw new Exception($"{screenworksheetName} has invalid screentest format");
+                                        }
+                                        else
+                                        {
+                                            test.ScreenTestDto = parsedScreenTest.lstItems;
+                                            ScreenTestList.Add(screenworksheetName);
+                                        }
+
+                                    }
+
+                                    lstJiraMasterDto.Add(test);
+                                }
+                                catch (Exception e)
+                                {
+                                   logger.LogError(e.Message);
+                                   throw;
+                                }
+                                
+                                iStepId += 1;
+                            }
                         }
-
-                        
                     }
+                    catch (Exception ex)
+                    {
+                        logger.LogError($"Failed on stepId {iStepId}");
+                        logger.LogError(ex.Message);
+                        throw;
+                    }
+
                 }
             }
 
-            return lstJiraMasterDto;
+            return Task.FromResult<IList<JiraTestMasterDto>>(lstJiraMasterDto);
         }
         catch (Exception e)
         {
@@ -138,6 +209,38 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
         }
 
         
+    }
+
+    private IDictionary<string, string> GetSuppliedValues(int iColumnIndex,DataTable dt)
+    {
+        var dictValues = new Dictionary<string, string>();
+        foreach (DataRow row in dt.Rows)
+        {
+            var key = row.ItemArray[0].GetEmptyIfEmptyOrNull().Trim();
+            if (string.IsNullOrEmpty(key))
+            {
+                continue;
+            }
+            if (!dictValues.ContainsKey(key))
+            {
+                var definedValue = row.ItemArray[iColumnIndex].GetEmptyIfEmptyOrNull();
+                if (!string.IsNullOrEmpty(definedValue))
+                {
+                    dictValues.Add(key, definedValue);
+                }
+                
+            }
+            else
+            {
+                logger.LogError($"Duplicate {key} found");
+            }
+            
+
+
+        }
+
+        return dictValues;
+
     }
     private DataTable ReadColum(ExcelWorksheet worksheet, int startRow)
     {
@@ -181,6 +284,7 @@ public class JiraTestScenarioReader : IJiraTestScenarioReader
             {
                 try
                 {
+                   
                     row[cell.Start.Column - 1] = cell.Text;
                 }
                 catch (Exception e)

@@ -10,6 +10,7 @@ public class JiraLogInDto
     [Required]
     public string Password { get; set; }
     [Required]
+
     public string LoginUrl { get; set; }
    
 

@@ -4,5 +4,5 @@ namespace JiraTesterProService.Workflow;
 
 public interface IJiraTestWorkflowRunner
 {
-    Task<IList<JiraTestResult>> RunJiraWorkflow();
+    Task<JiraWorkFlowResult> RunJiraWorkflow();
 }

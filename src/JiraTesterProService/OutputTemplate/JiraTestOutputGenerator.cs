@@ -4,143 +4,164 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using HandlebarsDotNet;
+
+using JiraTesterProService.BusinessExceptionHandler;
 using JiraTesterProService.JiraParser;
 
 namespace JiraTesterProService.OutputTemplate
 {
+    public partial class JiraTestOutput
+    {
+        public JiraTestOutPutModel Model { get; set; }
+    }
+
+    public partial class JiraBusinessExceptionOutput
+    {
+        public JiraBusinessExceptionOutPutModel Model { get; set; }
+    }
+
+    public partial class JiraScreenTestOutput
+    {
+        public JiraScreenTestOutPutModel Model { get; set; }
+    }
+
     public  class JiraTestOutputGenerator: IJiraTestOutputGenerator
     {
+        private IBusinessExceptionFactory businessExceptionFactory;
         private IJiraCustomParser jiraCustomParser;
-        public JiraTestOutputGenerator(IJiraCustomParser jiraCustomParser)
+        private ILogger<JiraTestOutputGenerator> logger;
+        public JiraTestOutputGenerator(IJiraCustomParser jiraCustomParser, IBusinessExceptionFactory businessExceptionFactory, ILogger<JiraTestOutputGenerator> logger)
         {
             this.jiraCustomParser = jiraCustomParser;
+            this.businessExceptionFactory = businessExceptionFactory;
+            this.logger = logger;
         }
 
-        public async Task<string> GetJiraOutPutTemplate(IList<JiraTestResult> lstTestResult)
+        public async Task<string> GetJiraOutPutTemplate(IList<JiraTestResult> lstTestResult, DateTime startTime,bool isIndividual=false)
+        {
+            try
+            {
+                string head = HeadHtml();
+                var metaData = await jiraCustomParser.GetJiraMetaData();
+                var assemblyversion = Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "1.0.0";
+
+
+                var output = new JiraTestOutput();
+                output.Model = new JiraTestOutPutModel()
+                {
+                    Header = head,
+                    HeaderSection = $"\"<div class=\"row gx-10\">\" {GetHeaderSection1(metaData)}{GetHeaderSection2(lstTestResult)} {GetHeaderSection3(assemblyversion,startTime)}</div>",
+                    TestResult = lstTestResult.OrderBy(x => x.JiraTestMasterDto.StepId).ToLookup(x => x.JiraTestMasterDto.GroupKey),
+                    IsIndividual = isIndividual
+                };
+                return output.TransformText();
+
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e.Message + e.StackTrace);
+                throw;
+            }
+           
+           
+          
+
+        }
+        public async Task<string> GetJiraScreenTestTemplate(IList<JiraTestResult> lstTestResult)
         {
             string head = HeadHtml();
-            var metaData = await jiraCustomParser.GetJiraMetaData();
-            var assemblyversion = Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "1.0.0";
-            var injectedData = new
+            var output = new JiraScreenTestOutput();
+
+            output.Model = new JiraScreenTestOutPutModel()
             {
-                assemblyversion,
-                TestResults = lstTestResult.ToLookup(x=>x.JiraTestMasterDto.GroupKey),
-                TotalTest = lstTestResult.Count(),
-                PassedTest = lstTestResult.Where(x=>x.TestPassed).Count(),
-                FailedTest = lstTestResult.Where(x=>!x.TestPassed).Count(),
-                JiraMetaData = metaData
+                Header = head,
+                TestResult = lstTestResult.OrderBy(x => x.JiraTestMasterDto.StepId).
+                    ToLookup(x => $"{x.JiraTestMasterDto.GroupKey}_{x.JiraTestMasterDto.Scenario}",x=>x.ScreenTestResult)
+               
+            };
+
+            return output.TransformText();
+
+
+        }
+
+
+        public string GetJiraBusinessExceptionTemplate(string groupKey)
+        {
+            string head = HeadHtml();
+            var businessExceptions = businessExceptionFactory.GetBusinessExceptionList().Where(x=> x.JiraMaster.GroupKey==groupKey);
+            var output = new JiraBusinessExceptionOutput();
+            output.Model = new JiraBusinessExceptionOutPutModel()
+            {
+                Header = head,
+                TestResult = businessExceptions.ToLookup(x => x.JiraMaster.Scenario)
 
             };
-           
-            var template = Handlebars.Compile($"<!DOCTYPE html><html languate=\"en\">{head}<div class=\"container-fluid\"><body> " +
-                                              $"{GetHeaderSections()}{GetTestReportSection()} </div></body></html>");
 
-
-
-
-
-            return template(injectedData);
-
-           
+            return output.TransformText();
 
 
         }
 
-        private static string GetTestReportSection()
+       
+
+        private string GetHeaderSection1(JiraMetaDataDto metaData)
         {
+            return 
+                   "<div class=\"col-sm rounded\">" +
+                   "<table class=\"table\">" +
+                   "<caption>System Summary</caption><thead>" +
+                   $"<tr><th>Jira Version</th> <th>{metaData.JiraVersion}</th>  </tr> " +
+                   $"<tr><th>Jira Url</th> <th>{metaData.JiraUrl}</th>  </tr>" +
+                   $"<tr><th>JiraAccount</th> <th>{metaData.JiraAccount}</th>  </tr>" +
+                   $"<tr><th>TestRunBy</th> <th>{metaData.TestRunBy}</th>  </tr>" +
+                   $"</thead><tbody></tbody></table>" +
+                   $"</div>";
 
 
-            return @"
+        }
+        private string GetHeaderSection2(IList<JiraTestResult> lstTestResult)
+        {            
+            var totalTest = lstTestResult.Select(x=>x.JiraTestMasterDto.GroupKey).Distinct();
+            //var passedTest = lstTestResult.Where(x => x.TestPassed).Count();
+            var failedTest = lstTestResult.Where(x => !x.TestPassed).Select(x => x.JiraTestMasterDto.GroupKey).Distinct();
 
-{{#each TestResults}}
+            var passedtest = totalTest.Except(failedTest).Count();
 
-<div  class=""row"">
-<div class=""col-sm border rounded"">
-    
-<div class=""table-responsive"">
-<table class=""table table-hover""><caption>{{Key}}</caption>
-<thead class=""thead-light"">
-<tr>
-<th>StepId</th>
-<th>Project</th>
-<th>IssueType</th>
-<th>ExecutedScenario</th>
-<th>Create/Update</th>
-<th>Action</th>
-<th>Expected Result</th>
-<th>Actual Result</th>
-<th>Pass/Fail</th>
-<th>IssueKey</th>
-<th>Expectation</th>
-<th>ScreenShots</th>
-<th>Exception</th>
-<th>Comments</th>
 
-</tr> 
-</thead>
-<tbody>
-{{#each @value}}
-{{#if TestPassed}}
-<tr class=""table-success"">
-{{else}}
-<tr class=""table-danger"">
-{{/if}}
-<td>{{JiraTestMasterDto.StepId}}</td>
-<td>{{ProjectName}}</td>
-<td>{{JiraTestMasterDto.IssueType}}</td>
-<td>{{JiraTestMasterDto.Scenario}}</td>
-<td>{{JiraTestMasterDto.Action}}</td>
-<td>{{JiraTestMasterDto.Status}}</td>
-<td>{{JiraTestMasterDto.ExpectedStatus}}</td>
-<td>{{JiraIssue.Status}}</td>
-<td>{{TestStatus}}</td>
-<td><a href=""{{JiraIssueUrl}}"">{{JiraIssue.Key}}</a></td>
-<td>{{JiraTestMasterDto.Expectation}}</td>
-<th><a href=""{{ScreenShotPath}}"">{{ScreenShotFileName}}</a></th>
-<th>{{Exception}}</th>
-<th>{{Comment}}</th>
-</tr>
-{{/each}}
-</tbody>
+            return 
+                   "<div class=\"col-sm rounded\">" +
+                   "<table class=\"table\">" +
+                   "<caption>WorkFlow Execution Details</caption><thead>" +
+                    $"<tr><th></th> <th></th>  <th>Percentage(%)</th></tr> " +
+                   $"<tr><th>Total Tests/WorkFlow Executed</th> <th>{totalTest.Count()}</th>  <th>100</th></tr> " +
+                 $"<tr class=\"table-success\"><th>Passed Tests</th> <th>{passedtest}</th><th> {((decimal)passedtest / totalTest.Count()) * 100} </th> </tr> " +
+                 //$"<tr class=\"table-success\"><th>Passed Tests(%)</th> <th>{(passedtest/ totalTest.Count())*100}</th></tr> " +
+                   $"<tr class=\"table-danger\"><th>Failed Tests</th> <th>{failedTest.Count()}</th><th> {((decimal)failedTest.Count() / totalTest.Count()) * 100} </th></tr> " +
+                   //$"<tr class=\"table-danger\"><th>Failed Tests(%)</th> <th>{(failedTest.Count()/ totalTest.Count())*100}</th></tr> " +
 
-</table>
-</div>
-</div>
-</div>
-{{/each}}
-";
+                   $"</thead><tbody></tbody></table>" +
+                   $"</div>";
+
+
         }
 
-
-
-
-        private  string GetHeaderSections()
+        private string GetHeaderSection3(string assemblyVersion,DateTime startTime)
         {
-            return @" <div  class=""row gx-10"">
-<div class=""col-sm rounded"">
-    <table class=""table""><caption>System Summary</caption><thead>
-<tr><th>Jira Version</th> <th>{{JiraMetaData.JiraVersion}}</th>  </tr> 
-<tr><th>Jira Url</th> <th>{{JiraMetaData.JiraUrl}}</th>  </tr>
-<tr><th>JiraAccount</th> <th>{{JiraMetaData.JiraAccount}}</th>  </tr>
-<tr><th>TestRunBy</th> <th>{{JiraMetaData.TestRunBy}}</th>  </tr>
-</thead><tbody></tbody></table>
-</div>
-<div class=""col-sm rounded"">
-    <table class=""table""><caption>Execution Details</caption>
-<thead>
-<tr><th>Total Tests</th> <th>{{TotalTest}}</th></tr> 
-<tr class=""table-success""><th>Passed Tests</th> <th>{{PassedTest}}</th></tr> 
-<tr class=""table-danger""><th>Failed Tests</th> <th>{{FailedTest}}</th></tr> 
-</thead>
-<tbody><tr><td></td></tr></tbody></table>
-</div>
-<div class=""col-sm rounded"">
-    <table class=""table""><caption>Test Automation Details</caption><thead><th>JiraTestProVersion</th><th>{{assemblyversion}}</th></thead><tbody><tr><td></td><td></td></tr></tbody></table>
-</div>
-</div>";
-        }
+            var diff = DateTime.Now.Subtract(startTime);
+            return $"<div class=\"col-sm rounded\"><table class=\"table\">" +
+                   $"<caption>Test Automation Details</caption><thead>" +
+                   $"<tr><th>JiraTestProVersion</th><th>{assemblyVersion}</th></tr>" +
+                   $"<tr><th>TestStartedAt:</th><th>{startTime.GetDisplayFormatDateTime()}</th></tr>" +
+                   $"<tr><th>TestCompletedAt:</th><th>{DateTime.Now.GetDisplayFormatDateTime()}</th></tr>" +
+                   $"<tr><th>Elapsed Time:</th><th>{string.Format("{0:D2}",diff.Hours)}:{string.Format("{0:D2}",diff.Minutes)} (HH:MM)</th></tr>" +
+                   $"</thead><tbody><tr><td></td><td></td></tr></tbody></table></div>";
 
+        }
+        
+
+
+        
 
         private string HeadHtml()
         {

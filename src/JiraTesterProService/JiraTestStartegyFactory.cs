@@ -1,4 +1,5 @@
-﻿using JiraTesterProService.ImageHandler;
+﻿using System.Collections.Concurrent;
+using JiraTesterProData;
 using JiraTesterProService.JiraParser;
 
 namespace JiraTesterProService;
@@ -6,19 +7,20 @@ namespace JiraTesterProService;
 public class JiraTestStartegyFactory : IJiraTestStartegyFactory
 {
     private IServiceProvider serviceProvider;
-    private IScreenCaptureService screenCaptureService;
-    private IJiraClientProvider jiraClientProvider;
-   
-    public JiraTestStartegyFactory(IServiceProvider serviceProvider, IScreenCaptureService screenCaptureService, IJiraClientProvider jiraClientProvider)
+    private ILogger<JiraTestStartegyFactory> logger;
+    protected ConcurrentDictionary<string, Project> dictProject = new ConcurrentDictionary<string, Project>();
+    protected IJiraClientProvider jiraClientProvider;
+    public JiraTestStartegyFactory(IServiceProvider serviceProvider, IJiraClientProvider jiraClientProvider, ILogger<JiraTestStartegyFactory> logger)
     {
         this.serviceProvider = serviceProvider;
-        this.screenCaptureService = screenCaptureService;
+        this.logger = logger;
         this.jiraClientProvider = jiraClientProvider;
-        
     }
+
 
     public  async Task<JiraTestResult> GetJiraTestStrategyResult(JiraTestMasterDto jiraTestMasterDto)
     {
+        logger.LogInformation($"Started running the test for workflow {jiraTestMasterDto.GroupKey} action {jiraTestMasterDto.Action}");
         var parsedAction = Enum.TryParse<JiraActionEnum>(jiraTestMasterDto.Action, true, out JiraActionEnum jiraAction);
         if (parsedAction)
         {
@@ -45,38 +47,33 @@ public class JiraTestStartegyFactory : IJiraTestStartegyFactory
 
     public async Task<IList<JiraTestResult>> GetJiraTestStrategyResult(IList<JiraTestMasterDto> jiraTestMasterDto)
     {
+        var orderedTests = jiraTestMasterDto.OrderBy(x => x.StepId).ToLookup(x=>x.GroupKey);
 
-      
-        var orderedTests = jiraTestMasterDto.OrderBy(x => x.GroupKey).ThenBy(x => x.OrderId).ThenBy(x=>x.IssueType);
 
         var lstTaskResults = new List<JiraTestResult>();
-        var prevIssueKey = string.Empty;
-        var parentIssueKey = string.Empty;
-        var jiraGroup = string.Empty;
-        var issueType = string.Empty;
-       
         foreach (var test in orderedTests)
         {
-            if (test.IsSubTask && jiraGroup.EqualsWithIgnoreCase(test.GroupKey))
-            {
-                test.ParentIssueKey = parentIssueKey;
-            }
 
-            if (jiraGroup == test.GroupKey && test.IssueType.EqualsWithIgnoreCase(issueType))
+          
+
+            logger.LogInformation($"Started running test for group key {test.Key}");
+            var testToRun = orderedTests[test.Key];
+
+            foreach (var step  in testToRun.OrderBy(x=>x.OrderId))
             {
-                test.IssueKey = prevIssueKey;
+                if (!dictProject.ContainsKey(step.Project))
+                {
+                    var projectDetails = await jiraClientProvider.GetJiraClient().Projects.GetProjectAsync(step.Project);
+                    dictProject.TryAdd(step.Project, projectDetails);
+                }
+
+                step.ProjectName = dictProject[step.Project].Name;
+                step.SuppliedValues.Add("Project", step.ProjectName);
+                step.SuppliedValues.Add("Issue Type", step.IssueType);
+                var result = await GetJiraTestStrategyResult(step);
+                lstTaskResults.Add(result);
             }
-            var result = await GetJiraTestStrategyResult(test);
-            lstTaskResults.Add(result);
-            if (result.JiraIssue != null)
-            {
-                parentIssueKey = result.JiraIssue.Key.Value;
-                prevIssueKey = result.JiraIssue.Key.Value;
-                issueType = result.JiraIssue.Type.Name;
-            }
-            
-            jiraGroup = test.GroupKey;
-            
+            logger.LogInformation($"Completed running test for group key {test.Key}");
         }
 
        

@@ -3,11 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BlazorDownloadFile;
 using JiraTesterProData;
+using JiraTesterProService.BusinessExceptionHandler;
 using JiraTesterProService.ExcelHandler;
 using JiraTesterProService.FileHandler;
 using JiraTesterProService.ImageHandler;
+using JiraTesterProService.JiraHtmlHelper;
 using JiraTesterProService.JiraParser;
+using JiraTesterProService.MailHandler;
 using JiraTesterProService.OutputTemplate;
 using JiraTesterProService.Workflow;
 using Microsoft.Extensions.Configuration;
@@ -65,7 +69,9 @@ namespace JiraTesterProService
             services.AddSingleton<IJiraFileConfigProvider, JiraFileConfigProvider>();
             services.AddScoped<IJiraTestWorkflowRunner, JiraTestWorkflowRunner>();
             RegisterJiraClientProvider(services);
-           
+            services.AddBlazorDownloadFile();
+            services.AddScoped<IRetryHelper, RetryHelper>();
+            services.AddScoped<IEmailSender, EmailSender>();
             ServiceProvider = services.BuildServiceProvider();
 
             if (options.IsWeb==null || !options.IsWeb.Value)
@@ -95,6 +101,7 @@ namespace JiraTesterProService
                     InputJiraTestFile = options.InputJiraTestFile ?? inputJiraTestFile
                 };
                 var jiraFileConfig = ServiceProvider.GetService<IJiraFileConfigProvider>();
+                
                 jiraFileConfig.InitializeConfig(fileConfig);
             }
         }
@@ -103,6 +110,12 @@ namespace JiraTesterProService
         {
             
             services.AddScoped<IJiraClientProvider, JiraClientProvider>();
+            services.AddScoped<IBusinessExceptionFactory, BusinessExceptionFactory>();
+            services.AddScoped<IJiraHtmlFieldDtoFactory, JiraHtmlFieldDtoFactory>();
+            services.AddScoped<IJiraScreenTestComparer, JiraScreenTestComparer>();
+            services.AddScoped<IJiraFieldInputProvider, JiraFieldInputProvider>();
+            services.AddScoped<IJiraFieldInputSimulator, JiraFieldInputSimulator>();
+            services.AddScoped<IJiraRefProvider, JiraRefProvider>();
         }
 
        

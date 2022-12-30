@@ -10,6 +10,6 @@ namespace JiraTesterProService
 {
     public interface IJiraTestResultWriter
     {
-        Task<bool> WriteTestResult(IList<JiraTestResult> lstJiraTestResult);
+        Task<IList<JiraTestResultWriterResult>> WriteTestResult(DateTime startTime, IList<JiraTestResult> lstJiraTestResult);
     }
 }

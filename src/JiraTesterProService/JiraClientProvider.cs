@@ -13,7 +13,7 @@ public class JiraClientProvider : IJiraClientProvider
         this.userCredentialProvider = userCredentialProvider;
     }
 
-    public Jira GetJiraClient(JiraRestClientSettings? settings)
+    public Jira GetJiraClient(JiraRestClientSettings settings)
     {
         var credential = userCredentialProvider.GetJiraCredential();
        
@@ -21,7 +21,7 @@ public class JiraClientProvider : IJiraClientProvider
         {
             settings = new JiraRestClientSettings()
             {
-                EnableRequestTrace = true
+                //EnableRequestTrace = true
 
             };
         }

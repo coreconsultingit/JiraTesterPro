@@ -15,7 +15,7 @@ namespace JiraTesterProTestFixture
     {
 
         [Test]
-        public void GetFinalHtmlJiraOutPut()
+        public async Task GetFinalHtmlJiraOutPut()
         {
             var jiraoutput = _serviceProvider.GetService<IJiraTestOutputGenerator>();
             var jratestResult = new List<JiraTestResult>()
@@ -24,22 +24,31 @@ namespace JiraTesterProTestFixture
                 {
                     ExceptionMessage = "",HasException = false,TestPassed = true,JiraTestMasterDto = new JiraTestMasterDto()
                     {
-                        Action = JiraActionEnum.Create.ToString(),Expectation = JiraTestStatusEnum.Passed.ToString(), StepId = 1,
+                        Action = JiraActionEnum.Create.ToString(),Expectation = JiraTestStatusConst.Passed, StepId = 1,GroupKey = "GP1"
                         
 
-                    }, Comment = "Test"
+                    }, Comment = "Test",ScreenShotPath=directoryPath
+                },
+                new()
+                {
+                    ExceptionMessage = "",HasException = false,TestPassed = true,JiraTestMasterDto = new JiraTestMasterDto()
+                    {
+                        Action = JiraActionEnum.Create.ToString(),Expectation = JiraTestStatusConst.Failed, StepId = 2,GroupKey = "GP1"
+
+
+                    }, Comment = "Test",ScreenShotPath=directoryPath
                 },
                 new()
                 {
                     ExceptionMessage = "Exception",HasException = true,TestPassed = false,JiraTestMasterDto = new JiraTestMasterDto()
                     {
-                        Action = JiraActionEnum.Create.ToString(),Expectation = JiraTestStatusEnum.Passed.ToString(), StepId = 2,
+                        Action = JiraActionEnum.Create.ToString(),Expectation = JiraTestStatusConst.Passed, StepId = 2,GroupKey = "GP2"
 
 
-                    }, Comment = "Test1"
+                    }, Comment = "Test1",ScreenShotPath=directoryPath
                 }
             };
-            var result = jiraoutput.GetJiraOutPutTemplate(jratestResult);
+            var result = await jiraoutput.GetJiraOutPutTemplate(jratestResult,DateTime.Now);
             Assert.IsNotNull(result);
         }
     }

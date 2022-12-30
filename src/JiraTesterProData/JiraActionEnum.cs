@@ -7,8 +7,9 @@ public enum JiraActionEnum
 
 }
 
-public enum JiraTestStatusEnum
+public static class JiraTestStatusConst
 {
-    Passed,
-    Failed
+    public const string Passed = "Passed";
+    public const string Failed = "Failed";
+    
 }

@@ -4,10 +4,10 @@ namespace JiraTesterProData;
 
 public class ScreenTestDto
 {
-    public int SlNo { get; set; }
-    public string FieldName { get; set; }
-    public string SystemField { get; set; }
-    public string ListValuesAvailable { get; set; }
-    public string Mandatory { get; set; }
+    public int SlNo { get; set; } = 0;
+    public string FieldName { get; set; } = string.Empty;
+    public string SystemField { get; set; } = string.Empty;
+    public string ListValuesAvailable { get; set; } = string.Empty;
+    public string Mandatory { get; set; } = string.Empty;
     public bool IsMandatory => Mandatory.EqualsWithIgnoreCase("YES");
 }

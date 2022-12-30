@@ -1,4 +1,6 @@
-﻿namespace JiraTesterProData;
+﻿using System.Runtime.Versioning;
+
+namespace JiraTesterProData;
 
 public class ScreenShotInputDto
 {
@@ -6,6 +8,8 @@ public class ScreenShotInputDto
     public string FilePath { get; set; }
    
     public string TestUrl { get; set; }
+
+    public byte[] ScreenShot { get; set; }
 
 }
 

@@ -1,0 +1,89 @@
+﻿<#@ template debug="true" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".html" #>
+<!DOCTYPE html><html languate="en">
+<#=Model.Header#>
+
+<body>
+<div class="container-fluid">
+
+
+<#foreach(var testresult in Model.TestResult){#>
+<div class="row">
+<div class="col-sm border rounded">
+<div class="table-responsive">
+<table class="table table-hover"><caption><#=testresult.Key#>  </caption>
+<thead class="thead-light">
+<tr>
+<th>SlNo.</th>
+<th>FieldName</th>
+
+<th>ExpectedFieldDefined</th>
+<th>ActualFieldDefined</th>
+
+<th>ExpectedValue</th>
+<th>Actual Values</th>
+
+<th>ExpectedMandatory</th>
+<th>ActualMandatory</th>
+
+<th>TestStatus</th>
+<th>Comment</th>
+
+</tr> 
+</thead>
+<tbody>
+<#foreach(var result in Model.TestResult[testresult.Key].SelectMany(x=>x)){
+if (result.TestPassed){#>
+<tr class="table-success">
+<#}#>
+<#else{#>
+<tr class="table-danger">
+<#}#>
+
+<td><#=result.ScreenTestDto.SlNo#></td>
+<td><#=result.ScreenTestDto?.FieldName#></td>
+<td><#=result.ScreenTestDto?.SystemField#></td>
+<td><#=result.HtmlFieldDto?.ElementType#></td>
+<td>
+<#foreach(var message in result.ScreenTestDto.ListValuesAvailable.GetStringSplitOnNewLine()){#>
+<pre><#=message#></pre>
+<#}#>
+</td>
+<td>
+<#foreach(var message in result.HtmlFieldDto.AvailableValues){#>
+<pre><#=message#></pre>
+<#}#>
+</td>
+<td><#=result.ScreenTestDto?.Mandatory#></td>
+<td><#=result.HtmlFieldDto?.IsMandatory#></td>
+
+
+<td><#=result.TestStatus.GetEmptyIfEmptyOrNull()#></td>
+<td>
+<#foreach(var message in result.Comment.GetStringSplitOnNewLine()){#>
+<pre><#=message#></pre>
+<#}#>
+</td>
+
+<#}#>
+
+</tr>
+</tbody>
+
+</table>
+</div>
+</div>
+</div>
+
+
+
+
+
+<#}#>
+
+</div>
+</body></html>

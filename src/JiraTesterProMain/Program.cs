@@ -14,6 +14,7 @@ using System;
 using JiraTesterProService.JiraParser;
 using JiraTesterProService.Workflow;
 using JiraTesterProService.ImageHandler;
+using JiraTesterProService.MailHandler;
 
 namespace JiraTesterProMain;
 
@@ -60,7 +61,16 @@ class Program
             await screenCaptureService.SetStartSession();
             var workflowRunner = serviceProvider.GetService<IJiraTestWorkflowRunner>();
 
-            await workflowRunner.RunJiraWorkflow();
+            var result = await workflowRunner.RunJiraWorkflow();
+
+            var mailSender = serviceProvider.GetService<IEmailSender>();
+            var masterHmtlContent = result.JiraTestResultWriterResult[0].MasterOutPutFilePath;
+            
+
+            mailSender.SendMessage("sunil.kumar.cci@clario.com", $"Jira Test Summary run as at {DateTime.Now}",
+                 File.ReadAllText(masterHmtlContent));
+
+
 
             await screenCaptureService.CloseSession();
 
