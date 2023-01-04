@@ -127,7 +127,8 @@ namespace JiraTesterProService.OutputTemplate
             var failedTest = lstTestResult.Where(x => !x.TestPassed).Select(x => x.JiraTestMasterDto.GroupKey).Distinct();
 
             var passedtest = totalTest.Except(failedTest).Count();
-
+            var passedTestPercentage = Math.Round(((decimal)passedtest / totalTest.Count()) * 100, 2);
+            var failedTestPercentage = Math.Round(((decimal)failedTest.Count() / totalTest.Count()) * 100, 2);
 
             return 
                    "<div class=\"col-sm rounded\">" +
@@ -135,9 +136,9 @@ namespace JiraTesterProService.OutputTemplate
                    "<caption>WorkFlow Execution Details</caption><thead>" +
                     $"<tr><th></th> <th></th>  <th>Percentage(%)</th></tr> " +
                    $"<tr><th>Total Tests/WorkFlow Executed</th> <th>{totalTest.Count()}</th>  <th>100</th></tr> " +
-                 $"<tr class=\"table-success\"><th>Passed Tests</th> <th>{passedtest}</th><th> {((decimal)passedtest / totalTest.Count()) * 100} </th> </tr> " +
+                 $"<tr class=\"table-success\"><th>Passed Tests</th> <th>{passedtest}</th><th> {passedTestPercentage} </th> </tr> " +
                  //$"<tr class=\"table-success\"><th>Passed Tests(%)</th> <th>{(passedtest/ totalTest.Count())*100}</th></tr> " +
-                   $"<tr class=\"table-danger\"><th>Failed Tests</th> <th>{failedTest.Count()}</th><th> {((decimal)failedTest.Count() / totalTest.Count()) * 100} </th></tr> " +
+                   $"<tr class=\"table-danger\"><th>Failed Tests</th> <th>{failedTest.Count()}</th><th> {failedTestPercentage} </th></tr> " +
                    //$"<tr class=\"table-danger\"><th>Failed Tests(%)</th> <th>{(failedTest.Count()/ totalTest.Count())*100}</th></tr> " +
 
                    $"</thead><tbody></tbody></table>" +

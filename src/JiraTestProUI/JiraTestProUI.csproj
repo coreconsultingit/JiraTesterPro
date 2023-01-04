@@ -24,9 +24,6 @@
 	  <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
 	</ItemGroup>
 	<ItemGroup>
-	  <Folder Include="Pages\" />
-	</ItemGroup>
-	<ItemGroup>
 	  <ProjectReference Include="..\JiraTesterProService\JiraTesterProService.csproj" />
 	</ItemGroup>
 	<ItemGroup>
